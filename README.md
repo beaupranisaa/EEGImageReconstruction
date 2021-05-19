@@ -3,7 +3,7 @@ Reconstruct visual stimuli (RGB cylinder) using generative based model from EEG 
 
 
 ### Contributors:
-Pranisaa Charnparttaravanit
+Pranisaa Charnparttaravanit <br>
 Chanapa Pananookooln
 Krittin Janjaochai
 Sitiporn Sae Lim

@@ -1,0 +1,15 @@
+tk
+sklearn
+Pillow
+pylsl==1.12.2
+psychopy
+numpy
+pandas
+seaborn
+torchvision
+torch
+IProgress
+bluepy
+pyOpenBCI
+pyqt5
+mne-0.22.0

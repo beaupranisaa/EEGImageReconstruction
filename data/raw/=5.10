@@ -1,0 +1,8 @@
+Collecting pyqt5
+  Downloading PyQt5-5.15.4-cp36.cp37.cp38.cp39-abi3-manylinux2014_x86_64.whl (8.3 MB)
+Collecting PyQt5-sip<13,>=12.8
+  Downloading PyQt5_sip-12.8.1-cp36-cp36m-manylinux1_x86_64.whl (278 kB)
+Collecting PyQt5-Qt5>=5.15
+  Downloading PyQt5_Qt5-5.15.2-py3-none-manylinux2014_x86_64.whl (59.9 MB)
+Installing collected packages: PyQt5-sip, PyQt5-Qt5, pyqt5
+Successfully installed PyQt5-Qt5-5.15.2 PyQt5-sip-12.8.1 pyqt5-5.15.4

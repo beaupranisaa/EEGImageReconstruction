@@ -129,6 +129,8 @@ dmypy.json
 .pyre/
 
 3-notebook/**
-data/**
+data/generated_img_video/**
+data/raw/**
+data/raw.zip
 model/**
-results/**
+results/*.csv

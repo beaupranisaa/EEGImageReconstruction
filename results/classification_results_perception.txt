@@ -1,0 +1,260 @@
+================= par1 ================
+ Train Acc: 99.73544973544973 
+ Valid Acc: 80.55555555555556 
+ Test Acc: 90.74074074074075 
+ Real test Acc: 31.666666666666664 
+------- Acc per class for test ------- 
+Red: 100.0 
+Green: 88.88888888888889 
+Blue: 83.33333333333333 
+---- Acc per class for real test ----- 
+Red: 35.0 
+Green: 35.0 
+Blue: 25.0 
+================= par2 ================
+ Train Acc: 98.67724867724867 
+ Valid Acc: 63.888888888888886 
+ Test Acc: 79.62962962962963 
+ Real test Acc: 25.0 
+------- Acc per class for test ------- 
+Red: 77.77777777777777 
+Green: 77.77777777777777 
+Blue: 83.33333333333333 
+---- Acc per class for real test ----- 
+Red: 30.0 
+Green: 15.0 
+Blue: 30.0 
+================= par3 ================
+ Train Acc: 99.47089947089947 
+ Valid Acc: 89.81481481481481 
+ Test Acc: 90.74074074074075 
+ Real test Acc: 45.0 
+------- Acc per class for test ------- 
+Red: 88.88888888888889 
+Green: 88.88888888888889 
+Blue: 94.44444444444444 
+---- Acc per class for real test ----- 
+Red: 35.0 
+Green: 55.0 
+Blue: 45.0 
+================= par4 ================
+ Train Acc: 96.29629629629629 
+ Valid Acc: 74.07407407407408 
+ Test Acc: 72.22222222222221 
+ Real test Acc: 13.333333333333334 
+------- Acc per class for test ------- 
+Red: 83.33333333333333 
+Green: 83.33333333333333 
+Blue: 50.0 
+---- Acc per class for real test ----- 
+Red: 20.0 
+Green: 15.0 
+Blue: 5.0 
+================= par5 ================
+ Train Acc: 99.20634920634922 
+ Valid Acc: 84.25925925925925 
+ Test Acc: 87.03703703703704 
+ Real test Acc: 26.666666666666668 
+------- Acc per class for test ------- 
+Red: 88.88888888888889 
+Green: 94.44444444444444 
+Blue: 77.77777777777777 
+---- Acc per class for real test ----- 
+Red: 75.0 
+Green: 0.0 
+Blue: 5.0 
+================= par6 ================
+ Train Acc: 99.47089947089947 
+ Valid Acc: 84.25925925925925 
+ Test Acc: 94.44444444444444 
+ Real test Acc: 50.0 
+------- Acc per class for test ------- 
+Red: 83.33333333333333 
+Green: 100.0 
+Blue: 100.0 
+---- Acc per class for real test ----- 
+Red: 35.0 
+Green: 60.0 
+Blue: 55.0 
+================= par7 ================
+ Train Acc: 98.14814814814815 
+ Valid Acc: 90.74074074074075 
+ Test Acc: 90.74074074074075 
+ Real test Acc: 28.333333333333332 
+------- Acc per class for test ------- 
+Red: 88.88888888888889 
+Green: 94.44444444444444 
+Blue: 88.88888888888889 
+---- Acc per class for real test ----- 
+Red: 40.0 
+Green: 30.0 
+Blue: 15.0 
+================= par8 ================
+ Train Acc: 99.20634920634922 
+ Valid Acc: 75.0 
+ Test Acc: 88.88888888888889 
+ Real test Acc: 38.333333333333336 
+------- Acc per class for test ------- 
+Red: 94.44444444444444 
+Green: 88.88888888888889 
+Blue: 83.33333333333333 
+---- Acc per class for real test ----- 
+Red: 5.0 
+Green: 45.0 
+Blue: 65.0 
+================= par9 ================
+ Train Acc: 99.73544973544973 
+ Valid Acc: 75.0 
+ Test Acc: 83.33333333333334 
+ Real test Acc: 35.0 
+------- Acc per class for test ------- 
+Red: 83.33333333333333 
+Green: 83.33333333333333 
+Blue: 83.33333333333333 
+---- Acc per class for real test ----- 
+Red: 75.0 
+Green: 0.0 
+Blue: 30.0 
+================= par10 ================
+ Train Acc: 100.0 
+ Valid Acc: 88.88888888888889 
+ Test Acc: 90.74074074074075 
+ Real test Acc: 31.666666666666664 
+------- Acc per class for test ------- 
+Red: 83.33333333333333 
+Green: 94.44444444444444 
+Blue: 94.44444444444444 
+---- Acc per class for real test ----- 
+Red: 30.0 
+Green: 25.0 
+Blue: 40.0 
+================= par11 ================
+ Train Acc: 96.56084656084656 
+ Valid Acc: 77.77777777777779 
+ Test Acc: 79.62962962962963 
+ Real test Acc: 33.33333333333333 
+------- Acc per class for test ------- 
+Red: 83.33333333333333 
+Green: 72.22222222222223 
+Blue: 83.33333333333333 
+---- Acc per class for real test ----- 
+Red: 30.0 
+Green: 35.0 
+Blue: 35.0 
+================= par12 ================
+ Train Acc: 100.0 
+ Valid Acc: 80.55555555555556 
+ Test Acc: 85.18518518518519 
+ Real test Acc: 31.666666666666664 
+------- Acc per class for test ------- 
+Red: 77.77777777777777 
+Green: 94.44444444444444 
+Blue: 83.33333333333333 
+---- Acc per class for real test ----- 
+Red: 30.0 
+Green: 35.0 
+Blue: 30.0 
+================= par13 ================
+ Train Acc: 99.20634920634922 
+ Valid Acc: 74.07407407407408 
+ Test Acc: 79.62962962962963 
+ Real test Acc: 16.666666666666664 
+------- Acc per class for test ------- 
+Red: 72.22222222222223 
+Green: 94.44444444444444 
+Blue: 72.22222222222223 
+---- Acc per class for real test ----- 
+Red: 15.0 
+Green: 10.0 
+Blue: 25.0 
+================= par14 ================
+ Train Acc: 99.20634920634922 
+ Valid Acc: 84.25925925925925 
+ Test Acc: 92.5925925925926 
+ Real test Acc: 18.333333333333332 
+------- Acc per class for test ------- 
+Red: 88.88888888888889 
+Green: 88.88888888888889 
+Blue: 100.0 
+---- Acc per class for real test ----- 
+Red: 30.0 
+Green: 20.0 
+Blue: 5.0 
+================= par15 ================
+ Train Acc: 99.47089947089947 
+ Valid Acc: 87.96296296296296 
+ Test Acc: 92.5925925925926 
+ Real test Acc: 38.333333333333336 
+------- Acc per class for test ------- 
+Red: 83.33333333333333 
+Green: 94.44444444444444 
+Blue: 100.0 
+---- Acc per class for real test ----- 
+Red: 35.0 
+Green: 60.0 
+Blue: 20.0 
+================= par16 ================
+ Train Acc: 99.20634920634922 
+ Valid Acc: 79.62962962962963 
+ Test Acc: 92.5925925925926 
+ Real test Acc: 53.333333333333336 
+------- Acc per class for test ------- 
+Red: 88.88888888888889 
+Green: 94.44444444444444 
+Blue: 94.44444444444444 
+---- Acc per class for real test ----- 
+Red: 15.0 
+Green: 75.0 
+Blue: 70.0 
+================= par17 ================
+ Train Acc: 99.73544973544973 
+ Valid Acc: 78.70370370370371 
+ Test Acc: 85.18518518518519 
+ Real test Acc: 23.333333333333332 
+------- Acc per class for test ------- 
+Red: 77.77777777777777 
+Green: 88.88888888888889 
+Blue: 88.88888888888889 
+---- Acc per class for real test ----- 
+Red: 10.0 
+Green: 20.0 
+Blue: 40.0 
+================= par18 ================
+ Train Acc: 99.47089947089947 
+ Valid Acc: 81.48148148148148 
+ Test Acc: 85.18518518518519 
+ Real test Acc: 36.666666666666664 
+------- Acc per class for test ------- 
+Red: 83.33333333333333 
+Green: 88.88888888888889 
+Blue: 83.33333333333333 
+---- Acc per class for real test ----- 
+Red: 45.0 
+Green: 60.0 
+Blue: 5.0 
+================= par19 ================
+ Train Acc: 99.47089947089947 
+ Valid Acc: 93.51851851851852 
+ Test Acc: 98.14814814814815 
+ Real test Acc: 33.33333333333333 
+------- Acc per class for test ------- 
+Red: 100.0 
+Green: 100.0 
+Blue: 94.44444444444444 
+---- Acc per class for real test ----- 
+Red: 45.0 
+Green: 20.0 
+Blue: 35.0 
+================= par20 ================
+ Train Acc: 98.4126984126984 
+ Valid Acc: 78.70370370370371 
+ Test Acc: 85.18518518518519 
+ Real test Acc: 36.666666666666664 
+------- Acc per class for test ------- 
+Red: 72.22222222222223 
+Green: 94.44444444444444 
+Blue: 88.88888888888889 
+---- Acc per class for real test ----- 
+Red: 20.0 
+Green: 40.0 
+Blue: 50.0 

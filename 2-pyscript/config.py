@@ -35,3 +35,9 @@ files = [
 "19-par19",
 "20-par20",
 ]
+
+# electrodes
+# relevant for 03_FeatureExtraction.py
+# F3 F8 F7 F4 P3 P4 T4 T3 Fp2 Fp1 C4 C3 T6 T5 O1 O2
+# 0  1  2  3  4  5  6  7  8   9   10 11 12 13 14 15
+electrodes = "[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]"

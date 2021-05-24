@@ -17,6 +17,9 @@ import torch.nn.functional as F
 import fnmatch
 import yaml
 import sys
+from utils import *
+from models import EEGEncoder
+np.set_printoptions(threshold=sys.maxsize)
 
 
 # Check GPU availability
@@ -30,15 +33,20 @@ file = sys.argv[2]
 fmin = float(sys.argv[3])
 fmax = float(sys.argv[4])
 task = sys.argv[5]
+electrodes = [int(i) for i in sys.argv[6].replace('[', ' ').replace(']', ' ').replace(',', ' ').split()]
 model_name = "cnn"
 
 
-X = np.load('../data/participants/{par}/{file}_{task}_{fmin}_{fmax}_X.npy'.format(par=par,file=file, task=task,fmin = fmin, fmax = fmax), allow_pickle=True)
-y = np.load('../data/participants/{par}/{file}_{task}_{fmin}_{fmax}_y.npy'.format(par=par,file=file, task=task,fmin = fmin, fmax = fmax), allow_pickle=True)
+X_ = np.load('../data/participants/{par}/02_ArtifactRemoval_Epoching_psd/{file}_{task}_{fmin}_{fmax}_X.npy'.format(par=par,file=file, task=task,fmin = fmin, fmax = fmax), allow_pickle=True)
+
+X = get_electrode(X_,electrodes)
+
+y = np.load('../data/participants/{par}/02_ArtifactRemoval_Epoching_psd/{file}_{task}_{fmin}_{fmax}_y.npy'.format(par=par,file=file, task=task,fmin = fmin, fmax = fmax), allow_pickle=True)
 
 
 # 1.1 Check shape
 # [# stim, # electrod, # datapoint]
+
 print(X.shape)
 print(y.shape)
 
@@ -66,24 +74,6 @@ X_model, X_real_test, y_model, y_real_test = train_test_split( X, y, test_size=0
 
 
 # Check if number of classes is equal
-def check_split(X1, X2, y1, y2, name1, name2):
-    unique1, count1 = np.unique(y1, return_counts=True)
-    unique2, count2 = np.unique(y2, return_counts=True)
-
-    assert count1[0] == count1[1] == count1[2]
-    assert count2[0] == count2[1] == count2[2]
-
-    print('='*20,name1,'='*20)
-    print(f"Shape of X_{name1}: ", X1.shape)
-    print(f"Shape of y_{name1}: ",y1.shape)
-    print(f"Classes of y_{name1}: ",unique1)
-    print(f"Counts of y_{name1} classes: ",count1)
-    print('='*20,name2,'='*20)
-    print(f"Shape of X_{name2}: ",X2.shape)
-    print(f"Shape of y_{name2}: ",y2.shape)
-    print(f"Classes of y_{name2}: ",unique2)
-    print(f"Counts of y_{name2} classes: ",count2)
-
 check_split(X_model, X_real_test, y_model, y_real_test,'model','real test')
 
 
@@ -94,20 +84,6 @@ check_split(X_model, X_real_test, y_model, y_real_test,'model','real test')
 # - For y(lebels) : Filled the lebels in y because we chunk X ( 1 stimuli into 6 chunk). We have 500 labels before but now we need 500 x 6 = 3000 labels
 
 # 3.1 Chunking
-
-import sys
-np.set_printoptions(threshold=sys.maxsize)
-
-def chunk_data(data, size):
-    data_keep = data.shape[2] - (data.shape[2]%size)
-    data = data[:,:,:data_keep]
-    data = data.reshape(-1,data.shape[1],data.shape[2]//size,size)
-    data = np.transpose(data, (0, 2, 1, 3)  )
-    return data
-
-def filled_y(y, chunk_num):
-    yy = np.array([[i] *chunk_num for i in  y ]).ravel()
-    return yy
 
 chunk_size = 10
 
@@ -124,7 +100,6 @@ y_filled = filled_y(y_model, chunk_per_stim)
 y = y_filled
 print(f'Shape of new y : {y.shape}')
 
-
 # 3.2 Train Test Val Split and Prepare X and y in correct shape
 # 
 # - For X, pytorch (if set batch_first) LSTM requires to be (batch, seq_len, features).  Thus, for us, it should be (100, 75, 16).
@@ -132,6 +107,7 @@ print(f'Shape of new y : {y.shape}')
 # - So let's convert our numpy to pytorch, and then reshape using view
 
 # 3.2.1 Train Test Val Split
+
 X_train, X_val_test, y_train, y_val_test = train_test_split( X, y, test_size=0.3, random_state=42, stratify= y)
 check_split(X_train, X_val_test, y_train, y_val_test,'train','val_test')
 
@@ -140,10 +116,6 @@ check_split(X_val, X_test, y_val, y_test ,'val','test')
 
 
 # 3.2.2 Convert to torch
-def check_torch_shape(torch_X, torch_y, name):
-    print('='*20,name,'='*20)
-    print(f"Shape of torch_X_{name}: ",torch_X.shape)
-    print(f"Shape of torch_y_{name}: ",torch_y.shape)    
 
 torch_X_train = torch.from_numpy(X_train)
 torch_y_train = torch.from_numpy(y_train)
@@ -197,34 +169,11 @@ test_iterator = torch.utils.data.DataLoader(dataset=test_dataset,
 
 # 5. Training for Feature Extraction 
 
-# 5.1 Define functions for calculating time, plotting and counting model params
-
-def epoch_time(start_time, end_time):
-    elapsed_time = end_time - start_time
-    elapsed_mins = int(elapsed_time / 60)
-    elapsed_secs = int(elapsed_time - (elapsed_mins * 60))
-    return elapsed_mins, elapsed_secs
-
-def do_plot(train_losses, valid_losses):
-    plt.figure(figsize=(25,5))
-#     clear_output(wait=True)
-    plt.plot(train_losses, label='Train Loss')
-    plt.plot(valid_losses, label='Valid Loss')
-    plt.title('Train and Val loss')
-    plt.legend()
-    plt.show()
-
-#Count the parameters for writing papers
-def count_parameters(model):
-    return sum(p.numel() for p in model.parameters() if p.requires_grad)
-
-
-# 5.2 Define model parameters
+# 5.1 Define model parameters
 # - Count model parameters
 # - optimizer
 # - loss function
 # - GPU
-from models import EEGEncoder
 
 model_EEGEncoder = EEGEncoder()
 model_EEGEncoder = model_EEGEncoder.float() #define precision as float to reduce running time
@@ -234,7 +183,7 @@ for model in models:
     print(f'The model {type(model).__name__} has {count_parameters(model):,} trainable parameters')# Train the model
 
 
-# 5.3 Train the model
+# 5.2 Train the model
 from train import train
 from evaluate import evaluate
 
@@ -293,16 +242,6 @@ for i, model in enumerate(models):
 
 
 # 6. Evaluation [Test set]
-# using test set
-
-def squeeze_to_list(_tmp):
-    from functools import reduce
-    import operator
-    xx = [ i.cpu().detach().numpy().ravel().tolist() for i in _tmp]
-    xx = reduce(operator.concat, xx)
-    return xx
-
-
 # Define classes
 
 classes = np.array(('Red', 'Green', 'Blue'))

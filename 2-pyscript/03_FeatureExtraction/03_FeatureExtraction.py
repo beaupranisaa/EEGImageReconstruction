@@ -317,7 +317,7 @@ torch_X_train_val_reshaped = torch_X_train_val.reshape(torch_X_train_val.shape[0
 print("Converted X to ", torch_X_train_val_reshaped.size())
 
 # save extracted features
-eeg_encode = model_EEGEncoder.get_latent(torch_X_train_val_reshaped.to(device).float())
+eeg_encode = model.get_latent(torch_X_train_val_reshaped.to(device).float())
 eeg_extracted_features = eeg_encode.detach().cpu().numpy()
 
 

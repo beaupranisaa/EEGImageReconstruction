@@ -8,10 +8,10 @@ class EEGEncoder(nn.Module):
     '''
     Expected Input Shape: (batch, channels, height , width)
     '''
-    def __init__(self):
+    def __init__(self, input_size):
         super().__init__()
         
-        self.activation = nn.Tanh(self, input_size)
+        self.activation = nn.Tanh()
         
         self.conv1 = nn.Sequential(    nn.Conv1d(input_size, 32, kernel_size=(1,3),   padding=(0,0), stride=(1,1))  ,  self.activation )
         self.conv2 = nn.Sequential(    nn.Conv1d(32, 64, kernel_size=(1,3) ,  padding=(0,0), stride=(1,1))  ,  self.activation )

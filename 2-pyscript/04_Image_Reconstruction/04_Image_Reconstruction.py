@@ -399,7 +399,7 @@ labels_test = labels_test.to(device)
 
 # 8.1.2 Encoder
 # Define model
-model_eeg_encoder_test = EEGEncoder()
+model_eeg_encoder_test = EEGEncoder(eeg_X_test.shape[1])
 model_eeg_encoder_test.load_state_dict(torch.load('../model/03_FeatureExtraction/{par}/EEG_ENCODER_{task}.pt.tar'.format(par=par,task=task)))#.to(device)
 model_eeg_encoder_test.eval().to(device)
 
@@ -459,7 +459,7 @@ labels_real_test = labels_real_test.to(device)
 
 # 8.2.2 Encoder
 # Define model
-model_eeg_encoder_realtest = EEGEncoder()
+model_eeg_encoder_realtest = EEGEncoder(eeg_X_real_test.shape[1])
 model_eeg_encoder_realtest.load_state_dict(torch.load('../model/03_FeatureExtraction/{par}/EEG_ENCODER_{task}.pt.tar'.format(par=par,task=task)))#.to(device)
 model_eeg_encoder_realtest.eval().to(device)
 

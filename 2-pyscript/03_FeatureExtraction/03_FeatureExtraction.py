@@ -176,7 +176,7 @@ test_iterator = torch.utils.data.DataLoader(dataset=test_dataset,
 # - loss function
 # - GPU
 
-model_EEGEncoder = EEGEncoder()
+model_EEGEncoder = EEGEncoder(input_size = len(electrodes))
 model_EEGEncoder = model_EEGEncoder.float() #define precision as float to reduce running time
 models = [model_EEGEncoder]
 
@@ -246,7 +246,7 @@ for i, model in enumerate(models):
 # Define classes
 
 classes = np.array(('Red', 'Green', 'Blue'))
-model = EEGEncoder()
+model = EEGEncoder(input_size = len(electrodes))
 model = model.float()
 model = model.to(device)
 model.load_state_dict(torch.load('../model/03_FeatureExtraction/{par}/EEG_ENCODER_{task}.pt.tar'.format(par=par,task=task)))
@@ -286,7 +286,7 @@ real_test_iterator = torch.utils.data.DataLoader(dataset=real_test_dataset,
                                           batch_size=BATCH_SIZE, 
                                           shuffle=True)
 
-model = EEGEncoder()
+model = EEGEncoder(input_size = len(electrodes))
 model = model.float()
 model = model.to(device)
 model.load_state_dict(torch.load('../model/03_FeatureExtraction/{par}/EEG_ENCODER_{task}.pt.tar'.format(par=par,task=task)))

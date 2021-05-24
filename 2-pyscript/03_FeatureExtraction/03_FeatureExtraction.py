@@ -33,7 +33,8 @@ file = sys.argv[2]
 fmin = float(sys.argv[3])
 fmax = float(sys.argv[4])
 task = sys.argv[5]
-electrodes = [int(i) for i in sys.argv[6].replace('[', ' ').replace(']', ' ').replace(',', ' ').split()]
+electrode_zone = sys.argv[6]
+electrodes = [int(i) for i in sys.argv[7].replace('[', ' ').replace(']', ' ').replace(',', ' ').split()]
 model_name = "cnn"
 
 

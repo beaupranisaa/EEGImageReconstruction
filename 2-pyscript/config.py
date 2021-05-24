@@ -40,12 +40,16 @@ files = [
 # relevant for 03_FeatureExtraction.py
 # F3 F8 F7 F4 P3 P4 T4 T3 Fp2 Fp1 C4 C3 T6 T5 O1 O2
 # 0  1  2  3  4  5  6  7  8   9   10 11 12 13 14 15
-electrodes_F = "[0,1,2,3]"
-electrodes_P = "[4,5]"
-electrodes_T = "[6,7,12,13]"
-electrodes_Fp = "[8,9]"
-electrodes_C = "[10,11]"
-electrodes_O = "[14,15]"
-electrodes_all = "[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]"
 
-electrodes = electrodes_all
+electrode_zones = {
+"electrodes_F" : "[0,1,2,3]"
+"electrodes_P" : "[4,5]"
+"electrodes_T" : "[6,7,12,13]"
+"electrodes_Fp" : "[8,9]"
+"electrodes_C" : "[10,11]"
+"electrodes_O" : "[14,15]"
+"electrodes_all" : "[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]"
+}
+
+electrode_zone = "electrodes_all"
+electrodes = electrode_zones[electrode_zone]

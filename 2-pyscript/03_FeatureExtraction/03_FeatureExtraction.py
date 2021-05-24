@@ -33,7 +33,8 @@ file = sys.argv[2]
 fmin = float(sys.argv[3])
 fmax = float(sys.argv[4])
 task = sys.argv[5]
-electrodes = [int(i) for i in sys.argv[6].replace('[', ' ').replace(']', ' ').replace(',', ' ').split()]
+electrode_zone = sys.argv[6]
+electrodes = [int(i) for i in sys.argv[7].replace('[', ' ').replace(']', ' ').replace(',', ' ').split()]
 model_name = "cnn"
 
 
@@ -175,7 +176,7 @@ test_iterator = torch.utils.data.DataLoader(dataset=test_dataset,
 # - loss function
 # - GPU
 
-model_EEGEncoder = EEGEncoder()
+model_EEGEncoder = EEGEncoder(input_size = len(electrodes))
 model_EEGEncoder = model_EEGEncoder.float() #define precision as float to reduce running time
 models = [model_EEGEncoder]
 
@@ -245,7 +246,7 @@ for i, model in enumerate(models):
 # Define classes
 
 classes = np.array(('Red', 'Green', 'Blue'))
-model = EEGEncoder()
+model = EEGEncoder(input_size = len(electrodes))
 model = model.float()
 model = model.to(device)
 model.load_state_dict(torch.load('../model/03_FeatureExtraction/{par}/EEG_ENCODER_{task}.pt.tar'.format(par=par,task=task)))
@@ -285,7 +286,7 @@ real_test_iterator = torch.utils.data.DataLoader(dataset=real_test_dataset,
                                           batch_size=BATCH_SIZE, 
                                           shuffle=True)
 
-model = EEGEncoder()
+model = EEGEncoder(input_size = len(electrodes))
 model = model.float()
 model = model.to(device)
 model.load_state_dict(torch.load('../model/03_FeatureExtraction/{par}/EEG_ENCODER_{task}.pt.tar'.format(par=par,task=task)))
@@ -316,7 +317,7 @@ torch_X_train_val_reshaped = torch_X_train_val.reshape(torch_X_train_val.shape[0
 print("Converted X to ", torch_X_train_val_reshaped.size())
 
 # save extracted features
-eeg_encode = model_EEGEncoder.get_latent(torch_X_train_val_reshaped.to(device).float())
+eeg_encode = model.get_latent(torch_X_train_val_reshaped.to(device).float())
 eeg_extracted_features = eeg_encode.detach().cpu().numpy()
 
 

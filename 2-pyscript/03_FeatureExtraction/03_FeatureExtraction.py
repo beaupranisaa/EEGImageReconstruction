@@ -175,7 +175,6 @@ test_iterator = torch.utils.data.DataLoader(dataset=test_dataset,
 # - optimizer
 # - loss function
 # - GPU
-
 model_EEGEncoder = EEGEncoder(input_size = len(electrodes))
 model_EEGEncoder = model_EEGEncoder.float() #define precision as float to reduce running time
 models = [model_EEGEncoder]

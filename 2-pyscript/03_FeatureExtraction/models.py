@@ -2,14 +2,15 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+
 import fnmatch
 
 class EEGEncoder(nn.Module):
     '''
     Expected Input Shape: (batch, channels, height , width)
     '''
-    def __init__(self):
-        super().__init__(self, input_size)
+    def __init__(self, input_size):
+        super().__init__()
         
         self.activation = nn.Tanh()
         

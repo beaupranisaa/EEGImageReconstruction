@@ -129,9 +129,10 @@ dmypy.json
 .pyre/
 
 3-notebook/**
-data/generated_img_video/**
-data/raw/*.csv
-data/raw.zip
+#data/generated_img_video/**
+#data/raw/*.csv
+#data/raw.zip
+data/**
 model/**
 results/*.csv
 #test

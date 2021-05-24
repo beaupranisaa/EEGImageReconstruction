@@ -14,7 +14,10 @@ from torch.optim import *
 import torchvision
 import torchvision.transforms as transforms
 
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+
 import numpy as np
 
 import os
@@ -39,7 +42,6 @@ print("Configured device: ", device)
 # Define stuffs
 par = sys.argv[1]
 task = sys.argv[3]
-print(task)
 
 
 # 1. Load Data
@@ -366,7 +368,7 @@ from models import EEGEncoder
 def save_gen_img(imgs, labels, name):
     labels = labels.cpu()
     try:
-        os.makedirs('../model/04_Image_Reconstruction/{par}/'.format(par=par))
+        os.makedirs('../data/participants/{par}/04_Image_Reconstruction/{task}/FID/{name}/'.format(par=par,task=task,name=name))
     except:
         pass
     np.save('../data/participants/{par}/04_Image_Reconstruction/{task}/FID/{name}/generated_labels'.format(par=par,task=task,name=name), labels)

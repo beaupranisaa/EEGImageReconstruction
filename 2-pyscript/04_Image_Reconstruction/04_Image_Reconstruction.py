@@ -14,6 +14,8 @@ from torch.optim import *
 import torchvision
 import torchvision.transforms as transforms
 
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -37,6 +39,7 @@ print("Configured device: ", device)
 
 
 # Define stuffs
+print(sys.argv)
 par = sys.argv[1]
 task = sys.argv[3]
 
@@ -318,6 +321,12 @@ for epoch in range(NUM_EPOCH):
             print('Epoch : {:1d}/{:1d} | Iteration : {:1d} | d_loss: {:6.6f} | g_loss: {:6.6f}'.format(epoch+1, NUM_EPOCH, iteration, d_loss.item(), g_loss.item()))
             do_plot(d_losses, g_losses)
 
+        #------- create directory ------   
+        try:
+            os.makedirs('../model/04_Image_Reconstruction/{par}/'.format(par=par))
+        except:
+            pass
+
         #------- Save Discriminator ------     
         if d_loss < d_best_valid_loss:
             d_best_valid_loss = d_loss
@@ -338,7 +347,6 @@ for epoch in range(NUM_EPOCH):
 
 from torchvision.utils import make_grid
 from termcolor import colored
-
 
 print(len(g_recon_image_list))
 
@@ -362,6 +370,10 @@ from models import EEGEncoder
 
 def save_gen_img(imgs, labels, name):
     labels = labels.cpu()
+    try:
+        os.makedirs('../data/participants/{par}/04_Image_Reconstruction/{task}/FID/{name}/'.format(par=par,task=task,name=name))
+    except:
+        pass
     np.save('../data/participants/{par}/04_Image_Reconstruction/{task}/FID/{name}/generated_labels'.format(par=par,task=task,name=name), labels)
     for i in range(len(imgs)):
         img = imgs[i]
@@ -370,6 +382,17 @@ def save_gen_img(imgs, labels, name):
         grid = make_grid(img, nrow=1, normalize=True, padding=0)
         save_image(grid,"../data/participants/{par}/04_Image_Reconstruction/{task}/FID/{name}/image_{i}.png".format(par=par,task=task,name=name,i=i))    
 
+def save_class_desicion(d_class_decition, labels, name):
+    labels = labels.cpu()
+    d_classify_loss = d_classify_criterion(     d_class_decition.to(device)  ,    labels.to(device)        )
+    try:
+        os.makedirs('../data/participants/{par}/04_Image_Reconstruction/{task}/InceptionAccuracy/{name}/'.format(par=par,task=task,name=name))
+    except:
+        pass
+    print(labels.cpu(), d_class_decition.cpu().detach().numpy(), d_classify_loss.cpu().detach().numpy())
+    np.save('../data/participants/{par}/04_Image_Reconstruction/{task}/InceptionAccuracy/{name}/labels'.format(par=par,task=task,name=name), labels.cpu())
+    np.save('../data/participants/{par}/04_Image_Reconstruction/{task}/InceptionAccuracy/{name}/d_class_decition'.format(par=par,task=task,name=name), d_class_decition.cpu().detach().numpy())
+    np.save('../data/participants/{par}/04_Image_Reconstruction/{task}/InceptionAccuracy/{name}/d_inception_acc'.format(par=par,task=task,name=name), d_classify_loss.cpu().detach().numpy())
 
 # 8.1 Test
 
@@ -433,6 +456,8 @@ name = "test"
 
 save_gen_img(g_imag_recon_test, labels_test, name)
 
+save_class_desicion(d_class_decision_from_fake_image_test, labels_test, name)
+
 # 8.2 REAL TEST
 
 # 8.2.1 Load Data and Data Loader
@@ -485,3 +510,5 @@ d_test_decision_realtest , d_class_decision_from_fake_image_realtest = D_net_tes
 name = "real_test"
 
 save_gen_img(g_imag_recon_realtest, labels_real_test, name)
+
+save_class_desicion(d_class_decision_from_fake_image_realtest, labels_real_test, name)

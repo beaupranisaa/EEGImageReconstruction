@@ -11,9 +11,9 @@ class EEGEncoder(nn.Module):
     def __init__(self):
         super().__init__()
         
-        self.activation = nn.Tanh()
+        self.activation = nn.Tanh(self, input_size)
         
-        self.conv1 = nn.Sequential(    nn.Conv1d(16, 32, kernel_size=(1,3),   padding=(0,0), stride=(1,1))  ,  self.activation )
+        self.conv1 = nn.Sequential(    nn.Conv1d(input_size, 32, kernel_size=(1,3),   padding=(0,0), stride=(1,1))  ,  self.activation )
         self.conv2 = nn.Sequential(    nn.Conv1d(32, 64, kernel_size=(1,3) ,  padding=(0,0), stride=(1,1))  ,  self.activation )
         # nn.Linear(XY,256) need to be changed!
         self.fc1   = nn.Sequential(    nn.Linear(384,256),  self.activation ,nn.Dropout(0.1)   ,nn.BatchNorm1d(256)   )

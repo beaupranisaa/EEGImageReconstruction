@@ -24,6 +24,7 @@ par = sys.argv[1]
 file = sys.argv[2]
 fmin = float(sys.argv[3])
 fmax = float(sys.argv[4])
+electrode_zone = sys.argv[5]
 
 
 # Here I decided to keep stuff in a form of dictionary where **keys** indicate the **task and time**
@@ -150,8 +151,8 @@ for task_type in task_types:
 #         psd = psd.mean(axis=1)
         X.append(psd)
     X = np.array(X)
-    np.save("../data/participants/{par}/02_ArtifactRemoval_Epoching_psd/{file}_{task_type}_{fmin}_{fmax}_X".format(par=par,file=file, fmin = fmin, fmax=fmax,task_type = task_type), X)
-    np.save("../data/participants/{par}/02_ArtifactRemoval_Epoching_psd/{file}_{task_type}_{fmin}_{fmax}_y".format(par=par,file=file, fmin = fmin, fmax=fmax, task_type = task_type), y)
+    np.save("../data/participants/{par}/02_ArtifactRemoval_Epoching_psd/{file}_{task_type}_{fmin}_{fmax}_{electrode_zone}_X".format(par=par,file=file, fmin = fmin, fmax=fmax,task_type = task_type, electrode_zone=electrode_zone), X)
+    np.save("../data/participants/{par}/02_ArtifactRemoval_Epoching_psd/{file}_{task_type}_{fmin}_{fmax}_{electrode_zone}_y".format(par=par,file=file, fmin = fmin, fmax=fmax, task_type = task_type, electrode_zone=electrode_zone), y)
 
 print(X.shape)
 print(y.shape)

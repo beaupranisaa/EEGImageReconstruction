@@ -9,7 +9,7 @@ class EEGEncoder(nn.Module):
     Expected Input Shape: (batch, channels, height , width)
     '''
     def __init__(self, input_size):
-        super().__init__()
+        super(EEGEncoder, self).__init__()
         
         self.activation = nn.Tanh()
         

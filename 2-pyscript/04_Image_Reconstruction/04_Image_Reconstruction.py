@@ -30,8 +30,7 @@ import sys
 
 from IPython.display import clear_output
 #get_ipython().run_line_magic('matplotlib', 'inline')
-from chosen_gpu import get_freer_gpu
-
+from utils import *
 
 # Check GPU availability
 device = torch.device(get_freer_gpu()) 
@@ -99,9 +98,6 @@ print("Shape of torch_y: ", torch_y.shape)
 # 1.2.2 Dataloader
 # 
 # BalancedBatchSampler allows equal number of classes to be drawn.
-
-from BalancedBatchSampler import BalancedBatchSampler
-
 latent_dataset = TensorDataset(torch_X, torch_y)
 
 n_classes = 3
@@ -133,39 +129,7 @@ import fnmatch
 from models import Generator
 from models import Discriminator
 
-def do_plot(d_losses, g_losses):
-    plt.figure(figsize=(25,5))
-#     clear_output(wait=True)
-    plt.plot(d_losses, label='Discriminator')
-    plt.plot(g_losses, label='Generator')
-    plt.title('GAN loss')
-    plt.legend()
-    plt.show()
-    
-def random_2D_noise(m,n):
-    """
-    Random an 2d array of random noise
-    =======================
-    m = # of samples
-    n = # of features
-    """
-    z     = np.random.uniform(-1, 1, size=(m,n))
-    z     = torch.from_numpy(z).float()
-    return z
-
-def display_img(img, epoch,labels):
-    img = img.cpu()
-    img = img.reshape(-1,3,224,224)
-    grid = make_grid(img, nrow=10, normalize=True, padding=0)
-    #print(f"Test: ../data/participants/{par}/04_Image_Reconstruction/{task}/generated_img/epoch_{epoch}.png")
-    save_image(grid,f"../data/participants/{par}/04_Image_Reconstruction/{task}/generated_img/epoch_{epoch}.png".format(par=par,task=task, epoch=epoch))
-    fig, ax = plt.subplots(figsize=(20,100))
-    ax.imshow(grid.permute(1, 2, 0).data)
-    ax.axis('off')
-
-
 # 2.1 Models
-
 
 from models import Generator
 from models import Discriminator
@@ -213,15 +177,6 @@ noise_size_latent = 32
 
 
 # 3. Train
-
-# rearrange order -> RGB
-def rearrange(eeg_latent, labels):
-    labels_sorted = torch.argsort(labels)
-
-    eeg_latent_ = eeg_latent[labels_sorted]
-    labels_ = labels[labels_sorted]
-    return eeg_latent_, labels_
-
 # set G and D in TRAIN MODE ( DO dropout )
 G_net.train()
 D_net.train()
@@ -232,7 +187,7 @@ iteration = 0
 for epoch in range(NUM_EPOCH):
     
     for batch_i , (eeg_latent, labels ) in enumerate(latent_loader):
-        
+        # rearrange order -> RGB
         eeg_latent, labels = rearrange(eeg_latent, labels)
         
         G_net.train()
@@ -367,32 +322,6 @@ print(colored("Generated image of last batch","blue", attrs=['bold']))
 # eeg_test_set --> encoder--> latent --> Generator --> reconstructed_image --> Discriminator --> h_hat (class) --> calculate accuracy
 
 from models import EEGEncoder
-
-def save_gen_img(imgs, labels, name):
-    labels = labels.cpu()
-    try:
-        os.makedirs('../data/participants/{par}/04_Image_Reconstruction/{task}/FID/{name}/'.format(par=par,task=task,name=name))
-    except:
-        pass
-    np.save('../data/participants/{par}/04_Image_Reconstruction/{task}/FID/{name}/generated_labels'.format(par=par,task=task,name=name), labels)
-    for i in range(len(imgs)):
-        img = imgs[i]
-        img = img.cpu()
-        img = img.reshape(-1,3,224,224)
-        grid = make_grid(img, nrow=1, normalize=True, padding=0)
-        save_image(grid,"../data/participants/{par}/04_Image_Reconstruction/{task}/FID/{name}/image_{i}.png".format(par=par,task=task,name=name,i=i))    
-
-def save_class_desicion(d_class_decition, labels, name):
-    labels = labels.cpu()
-    d_classify_loss = d_classify_criterion(     d_class_decition.to(device)  ,    labels.to(device)        )
-    try:
-        os.makedirs('../data/participants/{par}/04_Image_Reconstruction/{task}/InceptionAccuracy/{name}/'.format(par=par,task=task,name=name))
-    except:
-        pass
-    print(labels.cpu(), d_class_decition.cpu().detach().numpy(), d_classify_loss.cpu().detach().numpy())
-    np.save('../data/participants/{par}/04_Image_Reconstruction/{task}/InceptionAccuracy/{name}/labels'.format(par=par,task=task,name=name), labels.cpu())
-    np.save('../data/participants/{par}/04_Image_Reconstruction/{task}/InceptionAccuracy/{name}/d_class_decition'.format(par=par,task=task,name=name), d_class_decition.cpu().detach().numpy())
-    np.save('../data/participants/{par}/04_Image_Reconstruction/{task}/InceptionAccuracy/{name}/d_inception_acc'.format(par=par,task=task,name=name), d_classify_loss.cpu().detach().numpy())
 
 # 8.1 Test
 

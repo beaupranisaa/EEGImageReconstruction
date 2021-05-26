@@ -2,7 +2,7 @@ import numpy as np
 
 # perception or imagery
 # relevant for 03_FeatureExtraction.py and 04_Image_Reconstruction.py and FID_score.py
-task = "perception"
+tasks = ["perception", "imagery"]
 
 # frequency range
 # relevant for 02_ArtifactRemoval_Epoching_psd.py and 03_FeatureExtraction.py
@@ -59,7 +59,7 @@ electrode_zones = {
 "all" : "[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]",
 }
 
-electrode_zone = "all"
-electrodes = electrode_zones[electrode_zone]
+# electrode_zone = "all"
+# electrodes = electrode_zones[electrode_zone]
 
 round = 1

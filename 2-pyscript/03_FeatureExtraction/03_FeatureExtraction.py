@@ -7,6 +7,8 @@
 
 import numpy as np
 import pandas as pd
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from IPython.display import clear_output
 import torch
@@ -23,7 +25,7 @@ np.set_printoptions(threshold=sys.maxsize)
 
 
 # Check GPU availability
-from chosen_gpu import get_freer_gpu
+# from chosen_gpu import get_freer_gpu
 device = torch.device(get_freer_gpu()) 
 print("Configured device: ", device)
 
@@ -37,6 +39,18 @@ electrode_zone = sys.argv[6]
 electrodes = [int(i) for i in sys.argv[7].replace('[', ' ').replace(']', ' ').replace(',', ' ').split()]
 model_name = "cnn"
 roundno = sys.argv[8]
+
+print("#############Configuration#################")
+print("par:", par)
+print("round:", roundno)
+print("file:", file)
+print("fmin", fmin)
+print("fmax", fmax)
+print("task", task)
+print("electrode_zone:", electrode_zone)
+print("electrodes", electrodes)
+print("##############################")
+
 
 
 X_ = np.load('../data/participants/{par}/02_ArtifactRemoval_Epoching_psd/{file}_{task}_{fmin}_{fmax}_X.npy'.format(par=par,file=file, task=task,fmin = fmin, fmax = fmax), allow_pickle=True)
@@ -94,7 +108,7 @@ print(f'Oringinal X shape {X_model.shape}')
 X = chunk_data(X_model, chunk_size)
 print(f'Chunked X : {X.shape}') # (#stim, #chunks, #electrodes, #datapoint per chunk)
 chunk_per_stim = X.shape[1]
-X = X.reshape(-1,16,chunk_size)
+X = X.reshape(-1,len(electrodes),chunk_size)
 print(f'Reshape X to : {X.shape}')
 print('=================== y ==================')
 print(f'Shape of y : {y_model.shape}')
@@ -239,10 +253,10 @@ for i, model in enumerate(models):
             best_valid_loss = valid_loss
             #print("Model:{} saved.".format(type(model).__name__))
             try:
-                os.makedirs('../model/03_FeatureExtraction/{par}/{roundno}'.format(par=par,roundno=roundno))
+                os.makedirs('../model/03_FeatureExtraction/{par}/{roundno}/{electrode_zone}/{task}'.format(par=par,roundno=roundno,electrode_zone=electrode_zone,task=task))
             except:
                 pass
-            torch.save(model.state_dict(), "../model/03_FeatureExtraction/{par}/{roundno}/EEG_ENCODER_{task}.pt.tar".format(par=par,task=task,roundno=roundno))
+            torch.save(model.state_dict(), "../model/03_FeatureExtraction/{par}/{roundno}/{electrode_zone}/{task}/EEG_ENCODER_{fmin}_{fmax}.pt.tar".format(par=par,task=task,roundno=roundno,electrode_zone=electrode_zone,fmin=fmin,fmax=fmax))
             best_model_index = i
 
 
@@ -253,7 +267,7 @@ classes = np.array(('Red', 'Green', 'Blue'))
 model = EEGEncoder(input_size = len(electrodes))
 model = model.float()
 model = model.to(device)
-model.load_state_dict(torch.load('../model/03_FeatureExtraction/{par}/{roundno}/EEG_ENCODER_{task}.pt.tar'.format(par=par,task=task,roundno=roundno)))
+model.load_state_dict(torch.load("../model/03_FeatureExtraction/{par}/{roundno}/{electrode_zone}/{task}/EEG_ENCODER_{fmin}_{fmax}.pt.tar".format(par=par,task=task,roundno=roundno,electrode_zone=electrode_zone,fmin=fmin,fmax=fmax)))
 
 test_loss, test_acc , predicted, actual_labels, acc_class_test = evaluate(model, test_iterator, criterion, classes, device, test = True)
 print(f'Test Loss: {test_loss:.3f} | Test Acc: {test_acc:.2f}%')
@@ -268,7 +282,7 @@ out_test = zip(y_test_t, y_hat_test_t)
 # 7. Evaluation [Real Test]
 X_real_test = chunk_data(X_real_test, chunk_size)
 chunk_per_stim = X_real_test.shape[1]
-X_real_test = X_real_test.reshape(-1,16,chunk_size)
+X_real_test = X_real_test.reshape(-1,len(electrodes),chunk_size)
 y_filled_real_test = filled_y(y_real_test, chunk_per_stim)
 
 print("Chucked X_test: ",X_real_test.shape )
@@ -293,7 +307,7 @@ real_test_iterator = torch.utils.data.DataLoader(dataset=real_test_dataset,
 model = EEGEncoder(input_size = len(electrodes))
 model = model.float()
 model = model.to(device)
-model.load_state_dict(torch.load('../model/03_FeatureExtraction/{par}/{roundno}/EEG_ENCODER_{task}.pt.tar'.format(par=par,task=task,roundno=roundno)))
+model.load_state_dict(torch.load("../model/03_FeatureExtraction/{par}/{roundno}/{electrode_zone}/{task}/EEG_ENCODER_{fmin}_{fmax}.pt.tar".format(par=par,task=task,roundno=roundno,electrode_zone=electrode_zone,fmin=fmin,fmax=fmax)))
 
 test_loss, real_test_acc , predicted, actual_labels, acc_class_real_test = evaluate(model, real_test_iterator, criterion, classes, device, test=True)
 print(f'Test Loss: {test_loss:.3f} | Test Acc: {real_test_acc:.2f}%')
@@ -304,7 +318,7 @@ y_test_rt    = squeeze_to_list(actual_labels)
 y_hat_test_rt = squeeze_to_list(predicted)
 
 out_real_test = zip(y_test_rt, y_hat_test_rt)
-print(list(out_real_test))
+# print(list(out_real_test))
 
 # 8. Extracted Features
 X_train_val = np.concatenate((X_train,X_val))
@@ -327,28 +341,28 @@ eeg_extracted_features = eeg_encode.detach().cpu().numpy()
 
 # 9. SAVE
 try:
-    os.makedirs('../data/participants/{par}/03_FeatureExtraction/{roundno}/{task}'.format(par=par,task=task,roundno=roundno))
+    os.makedirs('../data/participants/{par}/03_FeatureExtraction/{roundno}/{electrode_zone}/{task}'.format(par=par,task=task,roundno=roundno,electrode_zone=electrode_zone))
 except:
     pass
 # Save Real Test
-np.save("../data/participants/{par}/03_FeatureExtraction/{roundno}/{task}/X_real_test".format(par=par,task=task,roundno=roundno),X_real_test)
-np.save("../data/participants/{par}/03_FeatureExtraction/{roundno}/{task}/y_real_test".format(par=par,task=task,roundno=roundno),y_filled_real_test)
+np.save("../data/participants/{par}/03_FeatureExtraction/{roundno}/{electrode_zone}/{task}/X_real_test_{fmin}_{fmax}".format(par=par,task=task,roundno=roundno,electrode_zone=electrode_zone,fmin=fmin,fmax=fmax),X_real_test)
+np.save("../data/participants/{par}/03_FeatureExtraction/{roundno}/{electrode_zone}/{task}/y_real_test_{fmin}_{fmax}".format(par=par,task=task,roundno=roundno,electrode_zone=electrode_zone,fmin=fmin,fmax=fmax),y_filled_real_test)
 
 # Save Train
-np.save("../data/participants/{par}/03_FeatureExtraction/{roundno}/{task}/X_train".format(par=par,task=task,roundno=roundno),X_train)
-np.save("../data/participants/{par}/03_FeatureExtraction/{roundno}/{task}/y_train".format(par=par,task=task,roundno=roundno),y_train)
+np.save("../data/participants/{par}/03_FeatureExtraction/{roundno}/{electrode_zone}/{task}/X_train_{fmin}_{fmax}".format(par=par,task=task,roundno=roundno,electrode_zone=electrode_zone,fmin=fmin,fmax=fmax),X_train)
+np.save("../data/participants/{par}/03_FeatureExtraction/{roundno}/{electrode_zone}/{task}/y_train_{fmin}_{fmax}".format(par=par,task=task,roundno=roundno,electrode_zone=electrode_zone,fmin=fmin,fmax=fmax),y_train)
 
 # Save Test
-np.save("../data/participants/{par}/03_FeatureExtraction/{roundno}/{task}/X_test".format(par=par,task=task,roundno=roundno),X_test)
-np.save("../data/participants/{par}/03_FeatureExtraction/{roundno}/{task}/y_test".format(par=par,task=task,roundno=roundno),y_test)
+np.save("../data/participants/{par}/03_FeatureExtraction/{roundno}/{electrode_zone}/{task}/X_test_{fmin}_{fmax}".format(par=par,task=task,roundno=roundno,electrode_zone=electrode_zone,fmin=fmin,fmax=fmax),X_test)
+np.save("../data/participants/{par}/03_FeatureExtraction/{roundno}/{electrode_zone}/{task}/y_test_{fmin}_{fmax}".format(par=par,task=task,roundno=roundno,electrode_zone=electrode_zone,fmin=fmin,fmax=fmax),y_test)
 
 # Save Val
-np.save("../data/participants/{par}/03_FeatureExtraction/{roundno}/{task}/X_val".format(par=par,task=task,roundno=roundno),X_val)
-np.save("../data/participants/{par}/03_FeatureExtraction/{roundno}/{task}/y_val".format(par=par,task=task,roundno=roundno),y_val)
+np.save("../data/participants/{par}/03_FeatureExtraction/{roundno}/{electrode_zone}/{task}/X_val_{fmin}_{fmax}".format(par=par,task=task,roundno=roundno,electrode_zone=electrode_zone,fmin=fmin,fmax=fmax),X_val)
+np.save("../data/participants/{par}/03_FeatureExtraction/{roundno}/{electrode_zone}/{task}/y_val_{fmin}_{fmax}".format(par=par,task=task,roundno=roundno,electrode_zone=electrode_zone,fmin=fmin,fmax=fmax),y_val)
 
 # Save Extracted Features
-np.save('../data/participants/{par}/03_FeatureExtraction/{roundno}/{task}/extracted_features_X'.format(par=par,task=task,roundno=roundno), eeg_extracted_features )
-np.save('../data/participants/{par}/03_FeatureExtraction/{roundno}/{task}/extracted_features_y'.format(par=par,task=task,roundno=roundno), y_train_val)
+np.save('../data/participants/{par}/03_FeatureExtraction/{roundno}/{electrode_zone}/{task}/extracted_features_X_{fmin}_{fmax}'.format(par=par,task=task,roundno=roundno,electrode_zone=electrode_zone,fmin=fmin,fmax=fmax), eeg_extracted_features )
+np.save('../data/participants/{par}/03_FeatureExtraction/{roundno}/{electrode_zone}/{task}/extracted_features_y_{fmin}_{fmax}'.format(par=par,task=task,roundno=roundno,electrode_zone=electrode_zone,fmin=fmin,fmax=fmax), y_train_val)
 
 
 # 10. Results
@@ -357,7 +371,7 @@ try:
 except:
     pass
 with open(f"../results/classification_results_{task}.txt", "a") as myfile:
-    myfile.write(f'================= {sys.argv[1]}:round{roundno} ================\n')
+    myfile.write(f'================= {par}:round{roundno}:{fmin}-{fmax} ================\n')
     myfile.write(f" Train Acc: {train_acc} \n Valid Acc: {valid_acc} \n Test Acc: {test_acc} \n Real test Acc: {real_test_acc} \n")
     myfile.write("------- Acc per class for test ------- \n")
     for v,k in acc_class_test.items():
@@ -367,7 +381,8 @@ with open(f"../results/classification_results_{task}.txt", "a") as myfile:
         myfile.write(f"{v}: {k[0]} \n")
 
 with open(f"../results/classification_results_{task}.csv", "a") as myfile:
-    myfile.write(f"{sys.argv[1]},{roundno},{train_acc},{valid_acc},{test_acc},{real_test_acc},")
+    myfile.write(f"parid,roundno,electrode_zone,fmin,fmax,train_acc,valid_acc,test_acc,real_test_acc,acc_class_test1,acc_class_test2,acc_class_test3,acc_class_real_test1,acc_class_real_test2,acc_class_real_test3")
+    myfile.write(f"{par},{roundno},{electrode_zone},{fmin},{fmax},{train_acc},{valid_acc},{test_acc},{real_test_acc},")
     for v,k in acc_class_test.items():
         myfile.write(f"{k[0]},")
     for v,k in acc_class_real_test.items():

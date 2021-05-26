@@ -79,7 +79,7 @@ def display_img(img, epoch,labels):
     img = img.reshape(-1,3,224,224)
     grid = make_grid(img, nrow=10, normalize=True, padding=0)
     #print(f"Test: ../data/participants/{par}/04_Image_Reconstruction/{task}/generated_img/epoch_{epoch}.png")
-    save_image(grid,f"../data/participants/{par}/04_Image_Reconstruction/{task}/generated_img/epoch_{epoch}.png".format(par=par,task=task, epoch=epoch))
+    save_image(grid,f"../data/participants/{par}/04_Image_Reconstruction/{roundno}/{task}/generated_img/epoch_{epoch}.png".format(par=par,task=task, epoch=epoch,roundno=roundno))
     fig, ax = plt.subplots(figsize=(20,100))
     ax.imshow(grid.permute(1, 2, 0).data)
     ax.axis('off')
@@ -95,25 +95,25 @@ def rearrange(eeg_latent, labels):
 def save_gen_img(imgs, labels, name):
     labels = labels.cpu()
     try:
-        os.makedirs('../data/participants/{par}/04_Image_Reconstruction/{task}/FID/{name}/'.format(par=par,task=task,name=name))
+        os.makedirs('../data/participants/{par}/04_Image_Reconstruction/{roundno}/{task}/FID/{name}/'.format(par=par,task=task,name=name,roundno=roundno))
     except:
         pass
-    np.save('../data/participants/{par}/04_Image_Reconstruction/{task}/FID/{name}/generated_labels'.format(par=par,task=task,name=name), labels)
+    np.save('../data/participants/{par}/04_Image_Reconstruction/{roundno}/{task}/FID/{name}/generated_labels'.format(par=par,task=task,name=name,roundno=roundno), labels)
     for i in range(len(imgs)):
         img = imgs[i]
         img = img.cpu()
         img = img.reshape(-1,3,224,224)
         grid = make_grid(img, nrow=1, normalize=True, padding=0)
-        save_image(grid,"../data/participants/{par}/04_Image_Reconstruction/{task}/FID/{name}/image_{i}.png".format(par=par,task=task,name=name,i=i))    
+        save_image(grid,"../data/participants/{par}/04_Image_Reconstruction/{roundno}/{task}/FID/{name}/image_{i}.png".format(par=par,task=task,name=name,i=i,roundno=roundno))    
 
 def save_class_desicion(d_class_decition, labels, name):
     labels = labels.cpu()
     d_classify_loss = d_classify_criterion(     d_class_decition.to(device)  ,    labels.to(device)        )
     try:
-        os.makedirs('../data/participants/{par}/04_Image_Reconstruction/{task}/InceptionAccuracy/{name}/'.format(par=par,task=task,name=name))
+        os.makedirs('../data/participants/{par}/04_Image_Reconstruction/{roundno}/{task}/InceptionAccuracy/{name}/'.format(par=par,task=task,name=name,roundno=roundno))
     except:
         pass
     print(labels.cpu(), d_class_decition.cpu().detach().numpy(), d_classify_loss.cpu().detach().numpy())
-    np.save('../data/participants/{par}/04_Image_Reconstruction/{task}/InceptionAccuracy/{name}/labels'.format(par=par,task=task,name=name), labels.cpu())
-    np.save('../data/participants/{par}/04_Image_Reconstruction/{task}/InceptionAccuracy/{name}/d_class_decition'.format(par=par,task=task,name=name), d_class_decition.cpu().detach().numpy())
-    np.save('../data/participants/{par}/04_Image_Reconstruction/{task}/InceptionAccuracy/{name}/d_inception_acc'.format(par=par,task=task,name=name), d_classify_loss.cpu().detach().numpy())
+    np.save('../data/participants/{par}/04_Image_Reconstruction/{roundno}/{task}/InceptionAccuracy/{name}/labels'.format(par=par,task=task,name=name,roundno=roundno), labels.cpu())
+    np.save('../data/participants/{par}/04_Image_Reconstruction/{roundno}/{task}/InceptionAccuracy/{name}/d_class_decition'.format(par=par,task=task,name=name,roundno=roundno), d_class_decition.cpu().detach().numpy())
+    np.save('../data/participants/{par}/04_Image_Reconstruction/{roundno}/{task}/InceptionAccuracy/{name}/d_inception_acc'.format(par=par,task=task,name=name,roundno=roundno), d_classify_loss.cpu().detach().numpy())

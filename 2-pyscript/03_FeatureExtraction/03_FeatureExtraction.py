@@ -36,6 +36,7 @@ task = sys.argv[5]
 electrode_zone = sys.argv[6]
 electrodes = [int(i) for i in sys.argv[7].replace('[', ' ').replace(']', ' ').replace(',', ' ').split()]
 model_name = "cnn"
+roundno = sys.argv[8]
 
 
 X_ = np.load('../data/participants/{par}/02_ArtifactRemoval_Epoching_psd/{file}_{task}_{fmin}_{fmax}_X.npy'.format(par=par,file=file, task=task,fmin = fmin, fmax = fmax), allow_pickle=True)
@@ -237,7 +238,11 @@ for i, model in enumerate(models):
         if valid_loss < best_valid_loss:
             best_valid_loss = valid_loss
             #print("Model:{} saved.".format(type(model).__name__))
-            torch.save(model.state_dict(), "../model/03_FeatureExtraction/{par}/EEG_ENCODER_{task}.pt.tar".format(par=par,task=task))
+            try:
+                os.makedirs('../model/03_FeatureExtraction/{par}/{roundno}'.format(par=par,roundno=roundno))
+            except:
+                pass
+            torch.save(model.state_dict(), "../model/03_FeatureExtraction/{par}/{roundno}/EEG_ENCODER_{task}.pt.tar".format(par=par,task=task,roundno=roundno))
             best_model_index = i
 
 
@@ -248,7 +253,7 @@ classes = np.array(('Red', 'Green', 'Blue'))
 model = EEGEncoder(input_size = len(electrodes))
 model = model.float()
 model = model.to(device)
-model.load_state_dict(torch.load('../model/03_FeatureExtraction/{par}/EEG_ENCODER_{task}.pt.tar'.format(par=par,task=task)))
+model.load_state_dict(torch.load('../model/03_FeatureExtraction/{par}/{roundno}/EEG_ENCODER_{task}.pt.tar'.format(par=par,task=task,roundno=roundno)))
 
 test_loss, test_acc , predicted, actual_labels, acc_class_test = evaluate(model, test_iterator, criterion, classes, device, test = True)
 print(f'Test Loss: {test_loss:.3f} | Test Acc: {test_acc:.2f}%')
@@ -288,7 +293,7 @@ real_test_iterator = torch.utils.data.DataLoader(dataset=real_test_dataset,
 model = EEGEncoder(input_size = len(electrodes))
 model = model.float()
 model = model.to(device)
-model.load_state_dict(torch.load('../model/03_FeatureExtraction/{par}/EEG_ENCODER_{task}.pt.tar'.format(par=par,task=task)))
+model.load_state_dict(torch.load('../model/03_FeatureExtraction/{par}/{roundno}/EEG_ENCODER_{task}.pt.tar'.format(par=par,task=task,roundno=roundno)))
 
 test_loss, real_test_acc , predicted, actual_labels, acc_class_real_test = evaluate(model, real_test_iterator, criterion, classes, device, test=True)
 print(f'Test Loss: {test_loss:.3f} | Test Acc: {real_test_acc:.2f}%')
@@ -321,30 +326,38 @@ eeg_extracted_features = eeg_encode.detach().cpu().numpy()
 
 
 # 9. SAVE
+try:
+    os.makedirs('../data/participants/{par}/03_FeatureExtraction/{roundno}/{task}'.format(par=par,task=task,roundno=roundno))
+except:
+    pass
 # Save Real Test
-np.save("../data/participants/{par}/03_FeatureExtraction/{task}/X_real_test".format(par=par,task=task),X_real_test)
-np.save("../data/participants/{par}/03_FeatureExtraction/{task}/y_real_test".format(par=par,task=task),y_filled_real_test)
+np.save("../data/participants/{par}/03_FeatureExtraction/{roundno}/{task}/X_real_test".format(par=par,task=task,roundno=roundno),X_real_test)
+np.save("../data/participants/{par}/03_FeatureExtraction/{roundno}/{task}/y_real_test".format(par=par,task=task,roundno=roundno),y_filled_real_test)
 
 # Save Train
-np.save("../data/participants/{par}/03_FeatureExtraction/{task}/X_train".format(par=par,task=task),X_train)
-np.save("../data/participants/{par}/03_FeatureExtraction/{task}/y_train".format(par=par,task=task),y_train)
+np.save("../data/participants/{par}/03_FeatureExtraction/{roundno}/{task}/X_train".format(par=par,task=task,roundno=roundno),X_train)
+np.save("../data/participants/{par}/03_FeatureExtraction/{roundno}/{task}/y_train".format(par=par,task=task,roundno=roundno),y_train)
 
 # Save Test
-np.save("../data/participants/{par}/03_FeatureExtraction/{task}/X_test".format(par=par,task=task),X_test)
-np.save("../data/participants/{par}/03_FeatureExtraction/{task}/y_test".format(par=par,task=task),y_test)
+np.save("../data/participants/{par}/03_FeatureExtraction/{roundno}/{task}/X_test".format(par=par,task=task,roundno=roundno),X_test)
+np.save("../data/participants/{par}/03_FeatureExtraction/{roundno}/{task}/y_test".format(par=par,task=task,roundno=roundno),y_test)
 
 # Save Val
-np.save("../data/participants/{par}/03_FeatureExtraction/{task}/X_val".format(par=par,task=task),X_val)
-np.save("../data/participants/{par}/03_FeatureExtraction/{task}/y_val".format(par=par,task=task),y_val)
+np.save("../data/participants/{par}/03_FeatureExtraction/{roundno}/{task}/X_val".format(par=par,task=task,roundno=roundno),X_val)
+np.save("../data/participants/{par}/03_FeatureExtraction/{roundno}/{task}/y_val".format(par=par,task=task,roundno=roundno),y_val)
 
 # Save Extracted Features
-np.save('../data/participants/{par}/03_FeatureExtraction/{task}/extracted_features_X'.format(par=par,task=task), eeg_extracted_features )
-np.save('../data/participants/{par}/03_FeatureExtraction/{task}/extracted_features_y'.format(par=par,task=task), y_train_val)
+np.save('../data/participants/{par}/03_FeatureExtraction/{roundno}/{task}/extracted_features_X'.format(par=par,task=task,roundno=roundno), eeg_extracted_features )
+np.save('../data/participants/{par}/03_FeatureExtraction/{roundno}/{task}/extracted_features_y'.format(par=par,task=task,roundno=roundno), y_train_val)
 
 
 # 10. Results
+try:
+    os.makedirs('../results')
+except:
+    pass
 with open(f"../results/classification_results_{task}.txt", "a") as myfile:
-    myfile.write(f'================= {sys.argv[1]} ================\n')
+    myfile.write(f'================= {sys.argv[1]}:round{roundno} ================\n')
     myfile.write(f" Train Acc: {train_acc} \n Valid Acc: {valid_acc} \n Test Acc: {test_acc} \n Real test Acc: {real_test_acc} \n")
     myfile.write("------- Acc per class for test ------- \n")
     for v,k in acc_class_test.items():
@@ -354,7 +367,7 @@ with open(f"../results/classification_results_{task}.txt", "a") as myfile:
         myfile.write(f"{v}: {k[0]} \n")
 
 with open(f"../results/classification_results_{task}.csv", "a") as myfile:
-    myfile.write(f"{sys.argv[1]},{train_acc},{valid_acc},{test_acc},{real_test_acc},")
+    myfile.write(f"{sys.argv[1]},{roundno},{train_acc},{valid_acc},{test_acc},{real_test_acc},")
     for v,k in acc_class_test.items():
         myfile.write(f"{k[0]},")
     for v,k in acc_class_real_test.items():

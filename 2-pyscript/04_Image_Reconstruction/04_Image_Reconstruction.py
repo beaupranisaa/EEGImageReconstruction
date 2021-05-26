@@ -41,7 +41,7 @@ print("Configured device: ", device)
 print(sys.argv)
 par = sys.argv[1]
 task = sys.argv[3]
-
+roundno = sys.argv[4]
 
 
 # 1. Load Data
@@ -81,8 +81,8 @@ actual_y = torch.Tensor(actual_y).long()
 print(actual_y)
 
 # 1.2 Load the latent EEG features and y labels
-EEG_latent = np.load('../data/participants/{par}/03_FeatureExtraction/{task}/extracted_features_X.npy'.format(par=par,task=task))
-y = np.load('../data/participants/{par}/03_FeatureExtraction/{task}/extracted_features_y.npy'.format(par=par,task=task))
+EEG_latent = np.load('../data/participants/{par}/03_FeatureExtraction/{roundno}/{task}/extracted_features_X.npy'.format(par=par,task=task, roundno=roundno))
+y = np.load('../data/participants/{par}/03_FeatureExtraction/{roundno}/{task}/extracted_features_y.npy'.format(par=par,task=task, roundno=roundno))
 
 print("Shape of EEG_latent: ",EEG_latent.shape)
 print("y: ",y[:20])
@@ -278,7 +278,7 @@ for epoch in range(NUM_EPOCH):
 
         #------- create directory ------   
         try:
-            os.makedirs('../model/04_Image_Reconstruction/{par}/'.format(par=par))
+            os.makedirs('../model/04_Image_Reconstruction/{par}/{roundno}'.format(par=par, roundno=roundno))
         except:
             pass
 
@@ -286,14 +286,14 @@ for epoch in range(NUM_EPOCH):
         if d_loss < d_best_valid_loss:
             d_best_valid_loss = d_loss
             print("Discriminator saved.")
-            torch.save(D_net.state_dict(), "../model/04_Image_Reconstruction/{par}/DISCRIMINATOR_{task}.pt.tar".format(par=par,task=task))
+            torch.save(D_net.state_dict(), "../model/04_Image_Reconstruction/{par}/{roundno}/DISCRIMINATOR_{task}.pt.tar".format(par=par,task=task, roundno=roundno))
 #             d_best_valid_loss = i
         
         #--------- Save Generator ---------   
         if g_loss < g_best_valid_loss:
             g_best_valid_loss = g_loss
             print("Generator saved.")
-            torch.save(G_net.state_dict(), "../model/04_Image_Reconstruction/{par}/GENERATOR_{task}.pt.tar".format(par=par,task=task))
+            torch.save(G_net.state_dict(), "../model/04_Image_Reconstruction/{par}/{roundno}/GENERATOR_{task}.pt.tar".format(par=par,task=task, roundno=roundno))
 #             g_best_valid_loss = i  
 
 
@@ -328,8 +328,8 @@ from models import EEGEncoder
 # 8.1.1 Load Data and Data Loader
 
 # Load data
-X_test = np.load("../data/participants/{par}/03_FeatureExtraction/{task}/X_test.npy".format(par=par,task=task).format(par=par,task=task))
-y_test = np.load("../data/participants/{par}/03_FeatureExtraction/{task}/y_test.npy".format(par=par,task=task).format(par=par,task=task))
+X_test = np.load("../data/participants/{par}/03_FeatureExtraction/{roundno}/{task}/X_test.npy".format(par=par,task=task,roundno=roundno))
+y_test = np.load("../data/participants/{par}/03_FeatureExtraction/{roundno}/{task}/y_test.npy".format(par=par,task=task,roundno=roundno))
 
 # Convert to torch
 torch_X_test = torch.from_numpy(X_test)
@@ -352,7 +352,7 @@ labels_test = labels_test.to(device)
 # 8.1.2 Encoder
 # Define model
 model_eeg_encoder_test = EEGEncoder(eeg_X_test.shape[1])
-model_eeg_encoder_test.load_state_dict(torch.load('../model/03_FeatureExtraction/{par}/EEG_ENCODER_{task}.pt.tar'.format(par=par,task=task)))#.to(device)
+model_eeg_encoder_test.load_state_dict(torch.load('../model/03_FeatureExtraction/{par}/{roundno}/EEG_ENCODER_{task}.pt.tar'.format(par=par,task=task,roundno=roundno)))#.to(device)
 model_eeg_encoder_test.eval().to(device)
 
 # Get latent
@@ -367,7 +367,7 @@ G_net_test.eval()
 noise_test = random_2D_noise(X_test_latent.shape[0], noise_size)
 noise_test = noise_test.to(device)
 
-G_net_test.load_state_dict(torch.load('../model/04_Image_Reconstruction/{par}/GENERATOR_{task}.pt.tar'.format(par=par,task=task)))
+G_net_test.load_state_dict(torch.load('../model/04_Image_Reconstruction/{par}/{roundno}/GENERATOR_{task}.pt.tar'.format(par=par,task=task,roundno=roundno)))
 
 g_imag_recon_test = G_net_test(X_test_latent, noise_test)
 
@@ -375,7 +375,7 @@ g_imag_recon_test = G_net_test(X_test_latent, noise_test)
 D_net_test = Discriminator(input_size = 150528, hidden_size = 64 ).to(device)
 D_net_test.eval()
 
-D_net_test.load_state_dict(torch.load('../model/04_Image_Reconstruction/{par}/DISCRIMINATOR_{task}.pt.tar'.format(par=par,task=task)))
+D_net_test.load_state_dict(torch.load('../model/04_Image_Reconstruction/{par}/{roundno}/DISCRIMINATOR_{task}.pt.tar'.format(par=par,task=task,roundno=roundno)))
 d_test_decision_test , d_class_decision_from_fake_image_test = D_net_test(g_imag_recon_test , X_test_latent)
 
 
@@ -391,8 +391,8 @@ save_class_desicion(d_class_decision_from_fake_image_test, labels_test, name)
 
 # 8.2.1 Load Data and Data Loader
 # Load data
-X_real_test = np.load("../data/participants/{par}/03_FeatureExtraction/{task}/X_real_test.npy".format(par=par,task=task).format(par=par,task=task))
-y_real_test = np.load("../data/participants/{par}/03_FeatureExtraction/{task}/y_real_test.npy".format(par=par,task=task).format(par=par,task=task))
+X_real_test = np.load("../data/participants/{par}/03_FeatureExtraction/{roundno}/{task}/X_real_test.npy".format(par=par,task=task,roundno=roundno))
+y_real_test = np.load("../data/participants/{par}/03_FeatureExtraction/{roundno}/{task}/y_real_test.npy".format(par=par,task=task,roundno=roundno))
 
 # Convert to torch
 torch_X_real_test = torch.from_numpy(X_real_test)
@@ -414,7 +414,7 @@ labels_real_test = labels_real_test.to(device)
 # 8.2.2 Encoder
 # Define model
 model_eeg_encoder_realtest = EEGEncoder(eeg_X_real_test.shape[1])
-model_eeg_encoder_realtest.load_state_dict(torch.load('../model/03_FeatureExtraction/{par}/EEG_ENCODER_{task}.pt.tar'.format(par=par,task=task)))#.to(device)
+model_eeg_encoder_realtest.load_state_dict(torch.load('../model/03_FeatureExtraction/{par}/{roundno}/EEG_ENCODER_{task}.pt.tar'.format(par=par,task=task,roundno=roundno)))#.to(device)
 model_eeg_encoder_realtest.eval().to(device)
 
 # Get latent
@@ -427,13 +427,13 @@ G_net_realtest.eval()
 noise_realtest = random_2D_noise(X_real_test_latent.shape[0], noise_size)
 noise_realtest = noise_realtest.to(device)
 G_net_realtest.eval()
-G_net_realtest.load_state_dict(torch.load('../model/04_Image_Reconstruction/{par}/GENERATOR_{task}.pt.tar'.format(par=par,task=task)))
+G_net_realtest.load_state_dict(torch.load('../model/04_Image_Reconstruction/{par}/{roundno}/GENERATOR_{task}.pt.tar'.format(par=par,task=task,roundno=roundno)))
 g_imag_recon_realtest = G_net_test(X_real_test_latent, noise_realtest)
 
 #### Feed image reconstruction to discriminator
 D_net_test = Discriminator(input_size = 150528, hidden_size = 64 ).to(device)
 D_net_test.eval()
-D_net_test.load_state_dict(torch.load('../model/04_Image_Reconstruction/{par}/DISCRIMINATOR_{task}.pt.tar'.format(par=par,task=task)))
+D_net_test.load_state_dict(torch.load('../model/04_Image_Reconstruction/{par}/{roundno}/DISCRIMINATOR_{task}.pt.tar'.format(par=par,task=task,roundno=roundno)))
 d_test_decision_realtest , d_class_decision_from_fake_image_realtest = D_net_test(g_imag_recon_realtest , X_real_test_latent)
 
 name = "real_test"

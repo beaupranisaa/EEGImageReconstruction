@@ -43,6 +43,26 @@ par = sys.argv[1]
 task = sys.argv[3]
 roundno = sys.argv[4]
 
+par = sys.argv[1]
+file = sys.argv[2]
+fmin = float(sys.argv[3])
+fmax = float(sys.argv[4])
+task = sys.argv[5]
+electrode_zone = sys.argv[6]
+electrodes = [int(i) for i in sys.argv[7].replace('[', ' ').replace(']', ' ').replace(',', ' ').split()]
+model_name = "cnn"
+roundno = sys.argv[8]
+
+print("/n#############Configuration#################")
+print("par:", par)
+print("round:", roundno)
+print("file:", file)
+print("fmin", fmin)
+print("fmax", fmax)
+print("task", task)
+print("electrode_zone:", electrode_zone)
+print("electrodes", electrodes)
+print("##############################")
 
 # 1. Load Data
 # 1.1 Load Stimulus Data
@@ -81,8 +101,8 @@ actual_y = torch.Tensor(actual_y).long()
 print(actual_y)
 
 # 1.2 Load the latent EEG features and y labels
-EEG_latent = np.load('../data/participants/{par}/03_FeatureExtraction/{roundno}/{task}/extracted_features_X.npy'.format(par=par,task=task, roundno=roundno))
-y = np.load('../data/participants/{par}/03_FeatureExtraction/{roundno}/{task}/extracted_features_y.npy'.format(par=par,task=task, roundno=roundno))
+EEG_latent = np.load('../data/participants/{par}/03_FeatureExtraction/{roundno}/{electrode_zone}/{task}/extracted_features_X_{fmin}_{fmax}.npy'.format(par=par,task=task,roundno=roundno,electrode_zone=electrode_zone,fmin=fmin,fmax=fmax))
+y = np.load('../data/participants/{par}/03_FeatureExtraction/{roundno}/{electrode_zone}/{task}/extracted_features_y_{fmin}_{fmax}.npy'.format(par=par,task=task,roundno=roundno,electrode_zone=electrode_zone,fmin=fmin,fmax=fmax))
 
 print("Shape of EEG_latent: ",EEG_latent.shape)
 print("y: ",y[:20])
@@ -176,145 +196,145 @@ noise_size = 16
 noise_size_latent = 32
 
 
-# 3. Train
-# set G and D in TRAIN MODE ( DO dropout )
-G_net.train()
-D_net.train()
-# noise_latent = random_2D_noise(batch_size, 32)
-# zero_latent = torch.from_numpy(np.zeros((batch_size,32) )).to(device).float()
+# # 3. Train
+# # set G and D in TRAIN MODE ( DO dropout )
+# G_net.train()
+# D_net.train()
+# # noise_latent = random_2D_noise(batch_size, 32)
+# # zero_latent = torch.from_numpy(np.zeros((batch_size,32) )).to(device).float()
 
-iteration = 0
-for epoch in range(NUM_EPOCH):
+# iteration = 0
+# for epoch in range(NUM_EPOCH):
     
-    for batch_i , (eeg_latent, labels ) in enumerate(latent_loader):
-        # rearrange order -> RGB
-        eeg_latent, labels = rearrange(eeg_latent, labels)
+#     for batch_i , (eeg_latent, labels ) in enumerate(latent_loader):
+#         # rearrange order -> RGB
+#         eeg_latent, labels = rearrange(eeg_latent, labels)
         
-        G_net.train()
-        D_net.train()
+#         G_net.train()
+#         D_net.train()
         
-        # ======== TRAIN DISCRIMINATOR ===========
-        D_net.zero_grad()
-        G_net.zero_grad()
-        D_optimizer.zero_grad()
+#         # ======== TRAIN DISCRIMINATOR ===========
+#         D_net.zero_grad()
+#         G_net.zero_grad()
+#         D_optimizer.zero_grad()
         
-        eeg_latent = eeg_latent.to(device)
-        labels     = labels.to(device)
+#         eeg_latent = eeg_latent.to(device)
+#         labels     = labels.to(device)
        
-        #---------- create all noises -------
-        noise_latent = random_2D_noise(batch_size, noise_size_latent)
-        noise_latent = noise_latent.to(device)
+#         #---------- create all noises -------
+#         noise_latent = random_2D_noise(batch_size, noise_size_latent)
+#         noise_latent = noise_latent.to(device)
 
-        noise_d = random_2D_noise(batch_size, noise_size)
-        noise_d = noise_d.to(device)
+#         noise_d = random_2D_noise(batch_size, noise_size)
+#         noise_d = noise_d.to(device)
 
-        noise_g = random_2D_noise(batch_size, noise_size)
-        noise_g = noise_g.to(device)
+#         noise_g = random_2D_noise(batch_size, noise_size)
+#         noise_g = noise_g.to(device)
         
-        #---------- Train with real image -------
-        real_images = real_images.to(device)
-        actual_y = actual_y.to(device)
+#         #---------- Train with real image -------
+#         real_images = real_images.to(device)
+#         actual_y = actual_y.to(device)
         
-        #rf_decision_real_image, num_decision_real_image = D_net(real_images, noise_latent)   
-        d_decision_out, d_class_out = D_net(real_images, noise_latent)   
-        all_real_labels = torch.from_numpy(np.ones(d_decision_out.shape)).to(device)
+#         #rf_decision_real_image, num_decision_real_image = D_net(real_images, noise_latent)   
+#         d_decision_out, d_class_out = D_net(real_images, noise_latent)   
+#         all_real_labels = torch.from_numpy(np.ones(d_decision_out.shape)).to(device)
         
-        d_loss_with_real_img = BCE_loss_criterion( d_decision_out  ,  all_real_labels  )
-        d_classify_loss = d_classify_criterion(     d_class_out  ,    actual_y         )
+#         d_loss_with_real_img = BCE_loss_criterion( d_decision_out  ,  all_real_labels  )
+#         d_classify_loss = d_classify_criterion(     d_class_out  ,    actual_y         )
         
         
-        #---------- Train with fake image -------
-        d_recon_image = G_net(eeg_latent, noise_d)
-        d_decision_out, d_class_out = D_net(d_recon_image, eeg_latent) 
-        all_fake_labels = torch.from_numpy(np.zeros(d_decision_out.shape)).to(device)
+#         #---------- Train with fake image -------
+#         d_recon_image = G_net(eeg_latent, noise_d)
+#         d_decision_out, d_class_out = D_net(d_recon_image, eeg_latent) 
+#         all_fake_labels = torch.from_numpy(np.zeros(d_decision_out.shape)).to(device)
         
-        d_loss_with_fake_img  = BCE_loss_criterion(d_decision_out, all_fake_labels)
-        d_loss = (d_loss_with_real_img + d_classify_loss + d_loss_with_fake_img)/3
+#         d_loss_with_fake_img  = BCE_loss_criterion(d_decision_out, all_fake_labels)
+#         d_loss = (d_loss_with_real_img + d_classify_loss + d_loss_with_fake_img)/3
         
-        d_loss.backward()
-        D_optimizer.step()
-#         D_lr_scheduler.step()  
+#         d_loss.backward()
+#         D_optimizer.step()
+# #         D_lr_scheduler.step()  
         
-        d_losses.append(d_loss.item())
+#         d_losses.append(d_loss.item())
     
-        # ======== TRAIN GENERATOR ===========
-        D_net.zero_grad()
-        G_net.zero_grad()  
-        G_optimizer.zero_grad()
+#         # ======== TRAIN GENERATOR ===========
+#         D_net.zero_grad()
+#         G_net.zero_grad()  
+#         G_optimizer.zero_grad()
         
-        G_recon_image = G_net(eeg_latent, noise_g)
+#         G_recon_image = G_net(eeg_latent, noise_g)
         
-        if batch_i == 0:
-            print("epoch: ", epoch, "batch: ", batch_i)
-            print("labels: ", labels)
-            display_img(G_recon_image, epoch, labels)
+#         if batch_i == 0:
+#             print("epoch: ", epoch, "batch: ", batch_i)
+#             print("labels: ", labels)
+#             display_img(G_recon_image, epoch, labels, par=par,task=task,roundno=roundno,electrode_zone=electrode_zone,fmin=fmin,fmax=fmax)
         
-        gd_decision_out, gd_class_decision_from_fake_image = D_net(G_recon_image , eeg_latent)
-        gd_class_decision_from_fake_image_list.append(gd_class_decision_from_fake_image)
+#         gd_decision_out, gd_class_decision_from_fake_image = D_net(G_recon_image , eeg_latent)
+#         gd_class_decision_from_fake_image_list.append(gd_class_decision_from_fake_image)
         
-        all_real_labels = torch.from_numpy(np.ones(gd_decision_out.shape)).to(device)
+#         all_real_labels = torch.from_numpy(np.ones(gd_decision_out.shape)).to(device)
     
-        semantic_loss = semantic_criterion(G_recon_image, real_images[labels])
-        gd_fake_rf_loss = BCE_loss_criterion(gd_decision_out, all_real_labels)
-        gd_fake_num_loss= d_classify_criterion(gd_class_decision_from_fake_image, labels)
+#         semantic_loss = semantic_criterion(G_recon_image, real_images[labels])
+#         gd_fake_rf_loss = BCE_loss_criterion(gd_decision_out, all_real_labels)
+#         gd_fake_num_loss= d_classify_criterion(gd_class_decision_from_fake_image, labels)
         
-        g_loss = (gd_fake_rf_loss + gd_fake_num_loss + (lamda*semantic_loss))/3
+#         g_loss = (gd_fake_rf_loss + gd_fake_num_loss + (lamda*semantic_loss))/3
 
-#         g_loss = (gd_fake_rf_loss + gd_fake_num_loss)/3
-        g_loss.backward()
-        G_optimizer.step()
+# #         g_loss = (gd_fake_rf_loss + gd_fake_num_loss)/3
+#         g_loss.backward()
+#         G_optimizer.step()
 
-        g_losses.append(g_loss.item())
-        eeg_original_labels.append(labels)
-        g_recon_image_list.append(G_recon_image)
+#         g_losses.append(g_loss.item())
+#         eeg_original_labels.append(labels)
+#         g_recon_image_list.append(G_recon_image)
         
-        iteration     += 1
+#         iteration     += 1
         
-        #--------- Display loss---------
-        if batch_i % print_every == 0:
-            clear_output(wait=True)
-            print('Epoch : {:1d}/{:1d} | Iteration : {:1d} | d_loss: {:6.6f} | g_loss: {:6.6f}'.format(epoch+1, NUM_EPOCH, iteration, d_loss.item(), g_loss.item()))
-            do_plot(d_losses, g_losses)
+#         #--------- Display loss---------
+#         if batch_i % print_every == 0:
+#             clear_output(wait=True)
+#             print('Epoch : {:1d}/{:1d} | Iteration : {:1d} | d_loss: {:6.6f} | g_loss: {:6.6f}'.format(epoch+1, NUM_EPOCH, iteration, d_loss.item(), g_loss.item()))
+#             do_plot(d_losses, g_losses)
 
-        #------- create directory ------   
-        try:
-            os.makedirs('../model/04_Image_Reconstruction/{par}/{roundno}/{electrode_zone}/{task}'.format(par=par,task=task,roundno=roundno,electrode_zone=electrode_zone))
-        except:
-            pass
+#         #------- create directory ------   
+#         try:
+#             os.makedirs('../model/04_Image_Reconstruction/{par}/{roundno}/{electrode_zone}/{task}'.format(par=par,task=task,roundno=roundno,electrode_zone=electrode_zone))
+#         except:
+#             pass
 
-        #------- Save Discriminator ------     
-        if d_loss < d_best_valid_loss:
-            d_best_valid_loss = d_loss
-            print("Discriminator saved.")
-            torch.save(D_net.state_dict(), "../model/04_Image_Reconstruction/{par}/{roundno}/{electrode_zone}/{task}/DISCRIMINATOR__{fmin}_{fmax}.pt.tar".format(par=par,task=task,roundno=roundno,electrode_zone=electrode_zone,fmin=fmin,fmax=fmax))
-#             d_best_valid_loss = i
+#         #------- Save Discriminator ------     
+#         if d_loss < d_best_valid_loss:
+#             d_best_valid_loss = d_loss
+#             print("Discriminator saved.")
+#             torch.save(D_net.state_dict(), "../model/04_Image_Reconstruction/{par}/{roundno}/{electrode_zone}/{task}/DISCRIMINATOR_{fmin}_{fmax}.pt.tar".format(par=par,task=task,roundno=roundno,electrode_zone=electrode_zone,fmin=fmin,fmax=fmax))
+# #             d_best_valid_loss = i
         
-        #--------- Save Generator ---------   
-        if g_loss < g_best_valid_loss:
-            g_best_valid_loss = g_loss
-            print("Generator saved.")
-            torch.save(G_net.state_dict(), "../model/04_Image_Reconstruction/{par}/{roundno}/{electrode_zone}/{task}/GENERATOR__{fmin}_{fmax}.pt.tar".format(par=par,task=task,roundno=roundno,electrode_zone=electrode_zone,fmin=fmin,fmax=fmax))
-#             g_best_valid_loss = i  
+#         #--------- Save Generator ---------   
+#         if g_loss < g_best_valid_loss:
+#             g_best_valid_loss = g_loss
+#             print("Generator saved.")
+#             torch.save(G_net.state_dict(), "../model/04_Image_Reconstruction/{par}/{roundno}/{electrode_zone}/{task}/GENERATOR_{fmin}_{fmax}.pt.tar".format(par=par,task=task,roundno=roundno,electrode_zone=electrode_zone,fmin=fmin,fmax=fmax))
+# #             g_best_valid_loss = i  
 
 
-# 4. Display Reconstructed Images of The Last Batch
-## Display stim reconstruct of last batch
+# # 4. Display Reconstructed Images of The Last Batch
+# ## Display stim reconstruct of last batch
 
-from torchvision.utils import make_grid
-from termcolor import colored
+# from torchvision.utils import make_grid
+# from termcolor import colored
 
-print(len(g_recon_image_list))
+# print(len(g_recon_image_list))
 
-batch_to_display = 1
+# batch_to_display = 1
 
-images_lastbatch = g_recon_image_list[-batch_to_display]
-labels_lastbatch = eeg_original_labels[-batch_to_display]
-images_lastbatch = images_lastbatch.cpu()
-display_img(images_lastbatch,'last_batch',labels_lastbatch)
+# images_lastbatch = g_recon_image_list[-batch_to_display]
+# labels_lastbatch = eeg_original_labels[-batch_to_display]
+# images_lastbatch = images_lastbatch.cpu()
+# display_img(images_lastbatch,'last_batch',labels_lastbatch, par=par,task=task,roundno=roundno,electrode_zone=electrode_zone,fmin=fmin,fmax=fmax)
 
-print(f'Y oringinal {eeg_original_labels[-batch_to_display]}')
-print(f'Y predicted {torch.max(gd_class_decision_from_fake_image_list[-batch_to_display],dim=1)[1]}')
-print(colored("Generated image of last batch","blue", attrs=['bold']))
+# print(f'Y oringinal {eeg_original_labels[-batch_to_display]}')
+# print(f'Y predicted {torch.max(gd_class_decision_from_fake_image_list[-batch_to_display],dim=1)[1]}')
+# print(colored("Generated image of last batch","blue", attrs=['bold']))
 
 
 # 8. Evaluate
@@ -367,7 +387,7 @@ G_net_test.eval()
 noise_test = random_2D_noise(X_test_latent.shape[0], noise_size)
 noise_test = noise_test.to(device)
 
-G_net_test.load_state_dict(torch.load('../model/04_Image_Reconstruction/{par}/{roundno}/{electrode_zone}/{task}/GENERATOR_{fmin}_{fmax}.pt.tar'.format(par=par,task=task,roundno=roundno,electrode_zone=electrode_zone,fmin=fmin,fmax=fmax)))
+G_net_test.load_state_dict(torch.load("../model/04_Image_Reconstruction/{par}/{roundno}/{electrode_zone}/{task}/GENERATOR_{fmin}_{fmax}.pt.tar".format(par=par,task=task,roundno=roundno,electrode_zone=electrode_zone,fmin=fmin,fmax=fmax)))
 
 g_imag_recon_test = G_net_test(X_test_latent, noise_test)
 
@@ -383,9 +403,9 @@ d_test_decision_test , d_class_decision_from_fake_image_test = D_net_test(g_imag
 
 name = "test"
 
-save_gen_img(g_imag_recon_test, labels_test, name)
+save_gen_img(g_imag_recon_test, labels_test, name, par=par,task=task,roundno=roundno,electrode_zone=electrode_zone,fmin=fmin,fmax=fmax)
 
-save_class_desicion(d_class_decision_from_fake_image_test, labels_test, name)
+save_class_desicion(d_class_decision_from_fake_image_test, labels_test, name, par=par,task=task,roundno=roundno,electrode_zone=electrode_zone,fmin=fmin,fmax=fmax)
 
 # 8.2 REAL TEST
 
@@ -414,7 +434,7 @@ labels_real_test = labels_real_test.to(device)
 # 8.2.2 Encoder
 # Define model
 model_eeg_encoder_realtest = EEGEncoder(eeg_X_real_test.shape[1])
-model_eeg_encoder_realtest.load_state_dict(torch.load('../model/03_FeatureExtraction/{par}/{roundno}/EEG_ENCODER_{task}.pt.tar'.format(par=par,task=task,roundno=roundno)))#.to(device)
+model_eeg_encoder_realtest.load_state_dict(torch.load('../model/03_FeatureExtraction/{par}/{roundno}/{electrode_zone}/{task}/EEG_ENCODER_{fmin}_{fmax}.pt.tar'.format(par=par,task=task,roundno=roundno,electrode_zone=electrode_zone,fmin=fmin,fmax=fmax)))#.to(device)
 model_eeg_encoder_realtest.eval().to(device)
 
 # Get latent
@@ -427,17 +447,17 @@ G_net_realtest.eval()
 noise_realtest = random_2D_noise(X_real_test_latent.shape[0], noise_size)
 noise_realtest = noise_realtest.to(device)
 G_net_realtest.eval()
-G_net_realtest.load_state_dict(torch.load('../model/04_Image_Reconstruction/{par}/{roundno}/GENERATOR_{task}.pt.tar'.format(par=par,task=task,roundno=roundno)))
+G_net_realtest.load_state_dict(torch.load('../model/04_Image_Reconstruction/{par}/{roundno}/{electrode_zone}/{task}/GENERATOR_{fmin}_{fmax}.pt.tar'.format(par=par,task=task,roundno=roundno,electrode_zone=electrode_zone,fmin=fmin,fmax=fmax)))
 g_imag_recon_realtest = G_net_test(X_real_test_latent, noise_realtest)
 
 #### Feed image reconstruction to discriminator
 D_net_test = Discriminator(input_size = 150528, hidden_size = 64 ).to(device)
 D_net_test.eval()
-D_net_test.load_state_dict(torch.load('../model/04_Image_Reconstruction/{par}/{roundno}/DISCRIMINATOR_{task}.pt.tar'.format(par=par,task=task,roundno=roundno)))
+D_net_test.load_state_dict(torch.load('../model/04_Image_Reconstruction/{par}/{roundno}/{electrode_zone}/{task}/DISCRIMINATOR_{fmin}_{fmax}.pt.tar'.format(par=par,task=task,roundno=roundno,electrode_zone=electrode_zone,fmin=fmin,fmax=fmax)))
 d_test_decision_realtest , d_class_decision_from_fake_image_realtest = D_net_test(g_imag_recon_realtest , X_real_test_latent)
 
 name = "real_test"
 
-save_gen_img(g_imag_recon_realtest, labels_real_test, name)
+save_gen_img(g_imag_recon_realtest, labels_real_test, name, par=par,task=task,roundno=roundno,electrode_zone=electrode_zone,fmin=fmin,fmax=fmax)
 
-save_class_desicion(d_class_decision_from_fake_image_realtest, labels_real_test, name)
+save_class_desicion(d_class_decision_from_fake_image_realtest, labels_real_test, name, par=par,task=task,roundno=roundno,electrode_zone=electrode_zone,fmin=fmin,fmax=fmax)

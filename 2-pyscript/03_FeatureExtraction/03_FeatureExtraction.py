@@ -380,9 +380,8 @@ with open(f"../results/classification_results_{task}.txt", "a") as myfile:
     for v,k in acc_class_real_test.items():
         myfile.write(f"{v}: {k[0]} \n")
 
-with open(f"../results/classification_results_{task}.csv", "a") as myfile:
-    myfile.write(f"parid,roundno,electrode_zone,fmin,fmax,train_acc,valid_acc,test_acc,real_test_acc,acc_class_test1,acc_class_test2,acc_class_test3,acc_class_real_test1,acc_class_real_test2,acc_class_real_test3")
-    myfile.write(f"{par},{roundno},{electrode_zone},{fmin},{fmax},{train_acc},{valid_acc},{test_acc},{real_test_acc},")
+with open(f"../results/classification_results.csv", "a") as myfile:
+    myfile.write(f"{par},{roundno},{task},{electrode_zone},{fmin},{fmax},{train_acc},{valid_acc},{test_acc},{real_test_acc},")
     for v,k in acc_class_test.items():
         myfile.write(f"{k[0]},")
     for v,k in acc_class_real_test.items():

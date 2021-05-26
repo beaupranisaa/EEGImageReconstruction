@@ -17,10 +17,10 @@ class EEGEncoder(nn.Module):
         self.conv1 = nn.Sequential(    nn.Conv1d(input_size, 32, kernel_size=(1,3),   padding=(0,0), stride=(1,1))  ,  self.activation )
         self.conv2 = nn.Sequential(    nn.Conv1d(32, 64, kernel_size=(1,3) ,  padding=(0,0), stride=(1,1))  ,  self.activation )
         # nn.Linear(XY,256) need to be changed!
-        self.fc1   = nn.Sequential(    nn.Linear(384,256),  self.activation ,nn.Dropout(0.1)   ,nn.BatchNorm1d(256)   )
-        self.fc2   = nn.Sequential(    nn.Linear(256,128),  self.activation ,nn.Dropout(0.1)   ,nn.BatchNorm1d(128) )
-        self.fc3   = nn.Sequential(    nn.Linear(128,64),  self.activation  ,nn.Dropout(0.1)   ,nn.BatchNorm1d(64) )
-        self.fc4   = nn.Sequential(    nn.Linear(64,32),  self.activation   ,nn.Dropout(0.1)   ,nn.BatchNorm1d(32) )
+        self.fc1   = nn.Sequential(    nn.Linear(384,256),  self.activation ,nn.Dropout(0.5)   ,nn.BatchNorm1d(256)   )
+        self.fc2   = nn.Sequential(    nn.Linear(256,128),  self.activation ,nn.Dropout(0.5)   ,nn.BatchNorm1d(128) )
+        self.fc3   = nn.Sequential(    nn.Linear(128,64),  self.activation  ,nn.Dropout(0.5)   ,nn.BatchNorm1d(64) )
+        self.fc4   = nn.Sequential(    nn.Linear(64,32),  self.activation   ,nn.Dropout(0.5)   ,nn.BatchNorm1d(32) )
         self.fc5   = nn.Sequential(    nn.Linear(32,3)   )
 
         self.is_debug= False

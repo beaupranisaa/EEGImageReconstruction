@@ -133,6 +133,7 @@ dmypy.json
 #data/raw/*.csv
 #data/raw.zip
 data/**
+data/participants/par18/04_Image_Reconstruction/**
 model/**
 results/*.csv
 #test

@@ -411,53 +411,53 @@ save_class_desicion(d_class_decision_from_fake_image_test, labels_test, name, pa
 
 # 8.2.1 Load Data and Data Loader
 # Load data
-# X_real_test = np.load("../data/participants/{par}/03_FeatureExtraction/{roundno}/{electrode_zone}/{task}/X_real_test_{fmin}_{fmax}.npy".format(par=par,task=task,roundno=roundno,electrode_zone=electrode_zone,fmin=fmin,fmax=fmax))
-# y_real_test = np.load("../data/participants/{par}/03_FeatureExtraction/{roundno}/{electrode_zone}/{task}/y_real_test_{fmin}_{fmax}.npy".format(par=par,task=task,roundno=roundno,electrode_zone=electrode_zone,fmin=fmin,fmax=fmax))
+X_real_test = np.load("../data/participants/{par}/03_FeatureExtraction/{roundno}/{electrode_zone}/{task}/X_real_test_{fmin}_{fmax}.npy".format(par=par,task=task,roundno=roundno,electrode_zone=electrode_zone,fmin=fmin,fmax=fmax))
+y_real_test = np.load("../data/participants/{par}/03_FeatureExtraction/{roundno}/{electrode_zone}/{task}/y_real_test_{fmin}_{fmax}.npy".format(par=par,task=task,roundno=roundno,electrode_zone=electrode_zone,fmin=fmin,fmax=fmax))
 
-# # Convert to torch
-# torch_X_real_test = torch.from_numpy(X_real_test)
-# torch_X_real_test_reshaped = torch_X_real_test.reshape(torch_X_real_test.shape[0],torch_X_real_test.shape[1],1,torch_X_real_test.shape[2])
-# torch_y_real_test = torch.from_numpy(y_real_test)
+# Convert to torch
+torch_X_real_test = torch.from_numpy(X_real_test)
+torch_X_real_test_reshaped = torch_X_real_test.reshape(torch_X_real_test.shape[0],torch_X_real_test.shape[1],1,torch_X_real_test.shape[2])
+torch_y_real_test = torch.from_numpy(y_real_test)
 
-# # Data loader
-# real_test_dataset = TensorDataset(torch_X_real_test_reshaped, torch_y_real_test)
-# real_test_loader = torch.utils.data.DataLoader(real_test_dataset, batch_size=54)
+# Data loader
+real_test_dataset = TensorDataset(torch_X_real_test_reshaped, torch_y_real_test)
+real_test_loader = torch.utils.data.DataLoader(real_test_dataset, batch_size=54)
 
-# iter_realtest = iter(real_test_loader)
-# eeg_X_real_test , labels_real_test = iter_realtest.next()
+iter_realtest = iter(real_test_loader)
+eeg_X_real_test , labels_real_test = iter_realtest.next()
 
-# # To device
-# eeg_X_real_test = eeg_X_real_test.to(device).float()
-# labels_real_test = labels_real_test.to(device)
+# To device
+eeg_X_real_test = eeg_X_real_test.to(device).float()
+labels_real_test = labels_real_test.to(device)
 
 
 # 8.2.2 Encoder
 # Define model
-# model_eeg_encoder_realtest = EEGEncoder(eeg_X_real_test.shape[1])
-# model_eeg_encoder_realtest.load_state_dict(torch.load('../model/03_FeatureExtraction/{par}/{roundno}/{electrode_zone}/{task}/EEG_ENCODER_{fmin}_{fmax}.pt.tar'.format(par=par,task=task,roundno=roundno,electrode_zone=electrode_zone,fmin=fmin,fmax=fmax)))#.to(device)
-# model_eeg_encoder_realtest.eval().to(device)
+model_eeg_encoder_realtest = EEGEncoder(eeg_X_real_test.shape[1])
+model_eeg_encoder_realtest.load_state_dict(torch.load('../model/03_FeatureExtraction/{par}/{roundno}/{electrode_zone}/{task}/EEG_ENCODER_{fmin}_{fmax}.pt.tar'.format(par=par,task=task,roundno=roundno,electrode_zone=electrode_zone,fmin=fmin,fmax=fmax)))#.to(device)
+model_eeg_encoder_realtest.eval().to(device)
 
-# # Get latent
-# X_real_test_latent = model_eeg_encoder_realtest.get_latent(eeg_X_real_test)
+# Get latent
+X_real_test_latent = model_eeg_encoder_realtest.get_latent(eeg_X_real_test)
 
-# # 8.2.3 GAN
-# ### Feed latent to Generator
-# G_net_realtest = Generator(input_size = 48, hidden_size = 96, output_size = 150528).to(device)
-# G_net_realtest.eval()
-# noise_realtest = random_2D_noise(X_real_test_latent.shape[0], noise_size)
-# noise_realtest = noise_realtest.to(device)
-# G_net_realtest.eval()
-# G_net_realtest.load_state_dict(torch.load('../model/04_Image_Reconstruction/{par}/{roundno}/{electrode_zone}/{task}/GENERATOR_{fmin}_{fmax}.pt.tar'.format(par=par,task=task,roundno=roundno,electrode_zone=electrode_zone,fmin=fmin,fmax=fmax)))
-# g_imag_recon_realtest = G_net_test(X_real_test_latent, noise_realtest)
+# 8.2.3 GAN
+### Feed latent to Generator
+G_net_realtest = Generator(input_size = 48, hidden_size = 96, output_size = 150528).to(device)
+G_net_realtest.eval()
+noise_realtest = random_2D_noise(X_real_test_latent.shape[0], noise_size)
+noise_realtest = noise_realtest.to(device)
+G_net_realtest.eval()
+G_net_realtest.load_state_dict(torch.load('../model/04_Image_Reconstruction/{par}/{roundno}/{electrode_zone}/{task}/GENERATOR_{fmin}_{fmax}.pt.tar'.format(par=par,task=task,roundno=roundno,electrode_zone=electrode_zone,fmin=fmin,fmax=fmax)))
+g_imag_recon_realtest = G_net_test(X_real_test_latent, noise_realtest)
 
-# #### Feed image reconstruction to discriminator
-# D_net_test = Discriminator(input_size = 150528, hidden_size = 64 ).to(device)
-# D_net_test.eval()
-# D_net_test.load_state_dict(torch.load('../model/04_Image_Reconstruction/{par}/{roundno}/{electrode_zone}/{task}/DISCRIMINATOR_{fmin}_{fmax}.pt.tar'.format(par=par,task=task,roundno=roundno,electrode_zone=electrode_zone,fmin=fmin,fmax=fmax)))
-# d_test_decision_realtest , d_class_decision_from_fake_image_realtest = D_net_test(g_imag_recon_realtest , X_real_test_latent)
+#### Feed image reconstruction to discriminator
+D_net_test = Discriminator(input_size = 150528, hidden_size = 64 ).to(device)
+D_net_test.eval()
+D_net_test.load_state_dict(torch.load('../model/04_Image_Reconstruction/{par}/{roundno}/{electrode_zone}/{task}/DISCRIMINATOR_{fmin}_{fmax}.pt.tar'.format(par=par,task=task,roundno=roundno,electrode_zone=electrode_zone,fmin=fmin,fmax=fmax)))
+d_test_decision_realtest , d_class_decision_from_fake_image_realtest = D_net_test(g_imag_recon_realtest , X_real_test_latent)
 
-# name = "real_test"
+name = "real_test"
 
-# save_gen_img(g_imag_recon_realtest, labels_real_test, name, par=par,task=task,roundno=roundno,electrode_zone=electrode_zone,fmin=fmin,fmax=fmax)
+save_gen_img(g_imag_recon_realtest, labels_real_test, name, par=par,task=task,roundno=roundno,electrode_zone=electrode_zone,fmin=fmin,fmax=fmax)
 
-# save_class_desicion(d_class_decision_from_fake_image_realtest, labels_real_test, name, par=par,task=task,roundno=roundno,electrode_zone=electrode_zone,fmin=fmin,fmax=fmax)
+save_class_desicion(d_class_decision_from_fake_image_realtest, labels_real_test, name, par=par,task=task,roundno=roundno,electrode_zone=electrode_zone,fmin=fmin,fmax=fmax)

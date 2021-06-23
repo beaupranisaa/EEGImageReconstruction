@@ -15,6 +15,7 @@ import pickle
 from mne import Epochs, find_events
 from IPython.display import clear_output
 import sys
+from utils import *
 
 # 1. Loading Data
 
@@ -24,7 +25,10 @@ par = sys.argv[1]
 file = sys.argv[2]
 fmin = float(sys.argv[3])
 fmax = float(sys.argv[4])
-
+tmin = float(sys.argv[5])
+tmax = float(sys.argv[6])
+electrode_zone = sys.argv[7]
+electrodes = [i for i in sys.argv[8].replace('[', ' ').replace(']', ' ').replace(',', ' ').split()]
 
 # Here I decided to keep stuff in a form of dictionary where **keys** indicate the **task and time**
 
@@ -56,85 +60,26 @@ import mne
 from mne import create_info
 from mne.io import RawArray
 
-def df_to_raw(df):
-    sfreq = 125
-    ch_names = list(df.columns)
-    ch_types = ['eeg'] * (len(df.columns) - 1) + ['stim']
-    ten_twenty_montage = mne.channels.make_standard_montage('standard_1020')
-
-    df = df.T  #mne looks at the tranpose() format
-    df[:-1] *= 1e-6  #convert from uVolts to Volts (mne assumes Volts data)
-
-    info = create_info(ch_names=ch_names, ch_types=ch_types, sfreq=sfreq)
-
-    raw = mne.io.RawArray(df, info)
-    raw.set_montage(ten_twenty_montage)
-
-    #try plotting the raw data of its power spectral density
-    raw.plot_psd()
-
-    return raw
-
 
 # Transform df to raw mne.
-
 raws = {}
 for task_type in task_types:
     print(f"========================= {task_type} ==========================")
-    raws[task_type] = df_to_raw(dfs_task_types[task_type])
+    raws[task_type] = df_to_raw(dfs_task_types[task_type], electrodes)
 
-def getEpochs(raw, event_id, tmin, tmax, picks):
 
-    #epoching
-    events = find_events(raw)
-    
-    #reject_criteria = dict(mag=4000e-15,     # 4000 fT
-    #                       grad=4000e-13,    # 4000 fT/cm
-    #                       eeg=100e-6,       # 150 μV
-    #                       eog=250e-6)       # 250 μV
+# Independent component analysis according to the selected electrode configuration
+from mne.preprocessing import ICA
+for task_type in task_types:
+    ica = ICA(n_components=len(electrodes), random_state=32)
+    # print(raws[task_type].shape)
+    ica.fit(raws[task_type])
+    #ica.apply(raws[task_type])
 
-    reject_criteria = dict(eeg=100e-6)  #most voltage in this range is not brain components
-
-    epochs = Epochs(raw, events=events, event_id=event_id, 
-                    tmin=tmin, tmax=tmax, baseline=None, preload=True,verbose=False, picks=picks)  #8 channels
-    print('sample drop %: ', (1 - len(epochs.events)/len(events)) * 100)
-
-    return epochs
-
-def get_psd(raw, filter=True):
-    '''
-    return log-transformed power spectra density, freq, mean and std 
-    '''
-    raw_copy = raw.copy()
-    if(filter):
-        raw_copy.filter(fmin, fmax, method='iir')
-        # if drift == "drift":
-        #     raw_copy.filter(fmin, fmax, method='iir')
-        # else:
-        #     raw_copy.filter(1, 40, method='iir')
-#             raw_copy.plot_psd()     
-    psd, freq = mne.time_frequency.psd_welch(raw_copy,n_fft = 96, verbose=False)
-    psd =  np.log10(psd)
-    mean = psd.mean(0)
-    std = psd.std(0)
-    return psd, freq, mean, std
-#     return raw_copy
-
-def plot_psd(raw):
-    psd, freq, mean, std = get_psd(raw)
-    fig, ax = plt.subplots(figsize=(10,5))
-    for i in range(8):
-        ax.plot(freq,psd[i] ,label=raw.info['ch_names'][i], lw=1, alpha=0.6)
-    ax.fill_between(250//2, mean - std, mean + std, color='k', alpha=.5)
-    ax.set_xlabel('Frequency (Hz)')
-    ax.set_ylabel('Amplitube (dBV)')
-    ax.set_title('EEG of ')
-    ax.legend()
-    plt.show()
 
 event_id = {'0': 1, '1' : 2, '2': 3}
-tmin = 0.115 #0
-tmax = 0.875
+# tmin = 0.115 #0
+# tmax = 0.875
 import time
 for task_type in task_types:
     X=[]
@@ -146,12 +91,12 @@ for task_type in task_types:
         clear_output(wait=True)
 #         epoch.plot()
 #         time.sleep(2)
-        psd,_,_,_ = get_psd(epoch, filter=True)
+        psd,_,_,_ = get_psd(epoch, fmin, fmax, filter=True)
 #         psd = psd.mean(axis=1)
         X.append(psd)
     X = np.array(X)
-    np.save("../data/participants/{par}/02_ArtifactRemoval_Epoching_psd/{file}_{task_type}_{fmin}_{fmax}_X".format(par=par,file=file, fmin = fmin, fmax=fmax,task_type = task_type), X)
-    np.save("../data/participants/{par}/02_ArtifactRemoval_Epoching_psd/{file}_{task_type}_{fmin}_{fmax}_y".format(par=par,file=file, fmin = fmin, fmax=fmax, task_type = task_type), y)
+    np.save("../data/participants/{par}/02_ArtifactRemoval_Epoching_psd/{file}_{task_type}_{fmin}_{fmax}_{tmin}_{tmax}_{electrode_zone}_X".format(par=par,file=file, fmin = fmin, fmax=fmax,task_type = task_type, tmin=tmin, tmax=tmax, electrode_zone=electrode_zone), X)
+    np.save("../data/participants/{par}/02_ArtifactRemoval_Epoching_psd/{file}_{task_type}_{fmin}_{fmax}_{tmin}_{tmax}_{electrode_zone}_y".format(par=par,file=file, fmin = fmin, fmax=fmax,task_type = task_type, tmin=tmin, tmax=tmax, electrode_zone=electrode_zone), y)
 
 print(X.shape)
 print(y.shape)

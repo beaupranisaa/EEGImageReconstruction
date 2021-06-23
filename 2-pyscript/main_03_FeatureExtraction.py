@@ -2,9 +2,9 @@ import os
 import time
 from config import *
 
-round = 5
+round = 1
 print('Total loop:', len(files)*round*len(electrode_zones)*len(tasks)*len(fmax_range))
-time.sleep(5)
+# time.sleep(5)
 for f in files:
     for r in range(round):
         for electrode_zone in electrode_zones:
@@ -13,4 +13,5 @@ for f in files:
                 for k in range(len(tmax_range)):
                     for j in range(len(fmax_range)):
                         i = int(f.split("-")[0])
-                        os.system(f'python3 03_FeatureExtraction/03_FeatureExtraction.py par{i} {f} {fmin_range[j]} {fmax_range[j]} {task} {electrode_zone} {electrodes} {r+1} {tmin_range[k]} {tmax_range[k]}')
+                        os.system(f'python3 03_FeatureExtraction/03_FeatureExtraction.py par{i} {f} {fmin_range[k]} {fmax_range[k]} {task} {electrode_zone} {electrodes} {r+1} {tmin_range[k]} {tmax_range[k]} {psd}')
+    break

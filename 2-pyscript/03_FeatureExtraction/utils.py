@@ -20,7 +20,7 @@ def get_electrode(X, electrodes):
 def check_split(X1, X2, y1, y2, name1, name2):
     unique1, count1 = np.unique(y1, return_counts=True)
     unique2, count2 = np.unique(y2, return_counts=True)
-
+    print(count1[0],count1[1],count1[2])
     assert count1[0] == count1[1] == count1[2]
     assert count2[0] == count2[1] == count2[2]
 

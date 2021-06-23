@@ -21,11 +21,11 @@ fmax_range = np.arange(start_freq + overlap_freq, stop_freq, window_freq)
 # time range
 # relevant for 02_ArtifactRemoval_Epoching_psd.py and 03_FeatureExtraction.py
 start_time = 0
-stop_time = 2000
-window_time = 500
-overlap_time = 250
-tmin_range = np.arange(start_time, stop_time - overlap_time, window_time)
-tmax_range = np.arange(start_time + overlap_time, stop_time, window_time)
+stop_time = 2.000
+window_time = 0.500
+overlap_time = 0.250
+tmin_range = np.arange(start_time, stop_time - overlap_time, overlap_time)
+tmax_range = np.arange(start_time + window_time, stop_time + overlap_time , overlap_time)
 
 # real_test or test
 # relevant for FID_score.py
@@ -64,24 +64,26 @@ files = [
 # # "P" : "[4,5]",
 # # "T" : "[6,7,12,13]",
 # # "Fp" : "[8,9]",
-# # "C" : "[10,11]",
+# # "C" : "[10,11]
 # # "O" : "[14,15]",
 # "all" : "[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]",
 # }
 
 electrode_zones = {
-# "F" : "[0,1,2,3]",
-# "P" : "[4,5]",
-# "T" : "[6,7,12,13]",
-# "Fp" : "[8,9]",
-# "C" : "[10,11]",
-# "O" : "[14,15]",
+# "F" : "[F3,F8,F7,F4]",
+# "P" : "[P3,P4]",
+# "T" : "[T4,T3,T6,T5]",
+# "Fp" : "[Fp2,Fp1]",
+# "C" : "[C4,C3]",
+# "O" : "[O1,O2]",
 "all" : "[F3,F8,F7,F4,P3,P4,T4,T3,Fp2,Fp1,C4,C3,T6,T5,O1,O2]",
 }
 
-
+#psd
+psd = True
 
 # electrode_zone = "all"
 # electrodes = electrode_zones[electrode_zone]
 
-round = 5
+round = 1
+

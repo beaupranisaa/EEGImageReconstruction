@@ -43,19 +43,27 @@ def getEpochs(raw, event_id, tmin, tmax, picks):
 
     return epochs
 
-def get_psd(raw, fmin, fmax, filter=True):
+def get_psd(raw, electrodes):
     '''
     return log-transformed power spectra density, freq, mean and std 
     '''
     raw_copy = raw.copy()
-    if(filter):
-        raw_copy.filter(fmin, fmax, method='iir')
+    # if(filter):
+    #     raw_copy.filter(fmin, fmax, method='iir')
         # if drift == "drift":
         #     raw_copy.filter(fmin, fmax, method='iir')
         # else:
         #     raw_copy.filter(1, 40, method='iir')
-#             raw_copy.plot_psd()     
-    psd, freq = mne.time_frequency.psd_welch(raw_copy,n_fft = 96, verbose=False)
+#             raw_copy.plot_psd() 
+        
+    sfreq = 125
+    ch_names = electrodes.copy()
+    # ch_names.append('Marker')
+    ch_types = ['eeg'] * (len(ch_names)) # + ['stim']
+    info = create_info(ch_names=ch_names, ch_types=ch_types, sfreq=sfreq)
+
+    raw_copy = mne.EvokedArray(raw_copy,info)
+    psd, freq = mne.time_frequency.psd_welch(raw_copy,n_fft = 63, verbose=False)
     psd =  np.log10(psd)
     mean = psd.mean(0)
     std = psd.std(0)

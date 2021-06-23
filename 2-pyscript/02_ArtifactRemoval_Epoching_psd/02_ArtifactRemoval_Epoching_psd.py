@@ -29,6 +29,7 @@ tmin = float(sys.argv[5])
 tmax = float(sys.argv[6])
 electrode_zone = sys.argv[7]
 electrodes = [i for i in sys.argv[8].replace('[', ' ').replace(']', ' ').replace(',', ' ').split()]
+psd_enable = bool(sys.argv[9])
 
 # Here I decided to keep stuff in a form of dictionary where **keys** indicate the **task and time**
 
@@ -88,16 +89,33 @@ for task_type in task_types:
     y = epochs.events[:, -1]
     y = y - 1
     for epoch in epochs.iter_evoked():
-        clear_output(wait=True)
+        # clear_output(wait=True)
 #         epoch.plot()
 #         time.sleep(2)
-        psd,_,_,_ = get_psd(epoch, fmin, fmax, filter=True)
-#         psd = psd.mean(axis=1)
-        X.append(psd)
+        epoch_copy = epoch.copy()
+        # Filter Frequency
+        epoch_copy.filter(fmin, fmax, method='iir')
+        # Min-Max Normalization
+        epoch_copy = np.transpose(epoch_copy.to_data_frame().to_numpy(), (1,0))
+        epoch_copy = epoch_copy[1:,:]
+        min = epoch_copy.min()
+        max = epoch_copy.max()
+        epoch_copy = (epoch_copy - min) / (max-min)
+        print(epoch_copy.shape)
+        if psd_enable is True:
+            psd,_,_,_ = get_psd(epoch_copy,electrodes)
+#           psd = psd.mean(axis=1)
+            X.append(psd)
+        else:
+            X.append(epoch_copy)
     X = np.array(X)
-    np.save("../data/participants/{par}/02_ArtifactRemoval_Epoching_psd/{file}_{task_type}_{fmin}_{fmax}_{tmin}_{tmax}_{electrode_zone}_X".format(par=par,file=file, fmin = fmin, fmax=fmax,task_type = task_type, tmin=tmin, tmax=tmax, electrode_zone=electrode_zone), X)
-    np.save("../data/participants/{par}/02_ArtifactRemoval_Epoching_psd/{file}_{task_type}_{fmin}_{fmax}_{tmin}_{tmax}_{electrode_zone}_y".format(par=par,file=file, fmin = fmin, fmax=fmax,task_type = task_type, tmin=tmin, tmax=tmax, electrode_zone=electrode_zone), y)
+
+    if psd_enable is True:
+        np.save("../data/participants/{par}/02_ArtifactRemoval_Epoching/{file}_{task_type}_{fmin}_{fmax}_{tmin}_{tmax}_{electrode_zone}_psd_X".format(par=par,file=file, fmin = fmin, fmax=fmax,task_type = task_type, tmin=tmin, tmax=tmax, electrode_zone=electrode_zone), X)
+        np.save("../data/participants/{par}/02_ArtifactRemoval_Epoching/{file}_{task_type}_{fmin}_{fmax}_{tmin}_{tmax}_{electrode_zone}_psd_y".format(par=par,file=file, fmin = fmin, fmax=fmax,task_type = task_type, tmin=tmin, tmax=tmax, electrode_zone=electrode_zone), y)
+    else:
+        np.save("../data/participants/{par}/02_ArtifactRemoval_Epoching/{file}_{task_type}_{fmin}_{fmax}_{tmin}_{tmax}_{electrode_zone}_X".format(par=par,file=file, fmin = fmin, fmax=fmax,task_type = task_type, tmin=tmin, tmax=tmax, electrode_zone=electrode_zone), X)
+        np.save("../data/participants/{par}/02_ArtifactRemoval_Epoching/{file}_{task_type}_{fmin}_{fmax}_{tmin}_{tmax}_{electrode_zone}_y".format(par=par,file=file, fmin = fmin, fmax=fmax,task_type = task_type, tmin=tmin, tmax=tmax, electrode_zone=electrode_zone), y)
 
 print(X.shape)
 print(y.shape)
-

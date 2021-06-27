@@ -13,5 +13,5 @@ for f in files:
                 for k in range(len(tmax_range)):
                     for j in range(len(fmax_range)):
                         i = int(f.split("-")[0])
-                        os.system(f'python3 03_FeatureExtraction/03_FeatureExtraction.py par{i} {f} {fmin_range[k]} {fmax_range[k]} {task} {electrode_zone} {electrodes} {r+1} {tmin_range[k]} {tmax_range[k]} {psd}')
-    break
+                        os.system(f'python3 03_FeatureExtraction/03_FeatureExtraction.py par{i} {f} {fmin_range[j]} {fmax_range[j]} {task} {electrode_zone} {electrodes} {r+1} {tmin_range[k]} {tmax_range[k]} {psd}')
+

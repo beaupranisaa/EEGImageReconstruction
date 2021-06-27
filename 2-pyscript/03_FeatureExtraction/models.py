@@ -38,8 +38,7 @@ class EEGEncoder(nn.Module):
             
         X = X.flatten(start_dim = 1)
 
-        # print(X.shape) 
- 
+        # print(X.shape)
         X = self.fc1(X)
         if self.is_debug : print('--------Flatten--------') ; print(X.shape) 
 
@@ -174,3 +173,99 @@ class Discriminator(nn.Module):
         num_decision = self.fc6_1(num_decision)
         
         return rf_decision, num_decision
+
+class EEGEncoder_nochunked(nn.Module):
+    '''
+    Expected Input Shape: (batch, channels, height , width)
+    '''
+    def __init__(self, input_size, datalength):
+        super(EEGEncoder_nochunked,self).__init__()
+        
+        self.activation = nn.Tanh()
+
+        self.channel_out_c1 = 32
+        self.kernel_size  = 3
+        self.stride  = 1
+        
+        ## calculate the fc1 input channel size
+        ## since cnn size is I-(K-1) , but we have 2 CNN layers
+        ## So, I just run it two time then, multiply with the CNN layter's two out put size
+        self.fc1_ch_in    = datalength-(self.kernel_size-1)
+        self.fc1_ch_in    = (self.fc1_ch_in-(self.kernel_size-1))*(self.channel_out_c1*2)        
+
+
+        self.conv1 = nn.Sequential(    nn.Conv1d(input_size, self.channel_out_c1, kernel_size=(1,self.kernel_size),   padding=(0,0), stride=(1,1))  ,  self.activation )
+        self.conv2 = nn.Sequential(    nn.Conv1d(self.channel_out_c1, self.channel_out_c1*2, kernel_size=(1,self.kernel_size) ,  padding=(0,0), stride=(1,1))  ,  self.activation )
+        # nn.Linear(XY,256) need to be changed!
+        self.fc1   = nn.Sequential(    nn.Linear(self.fc1_ch_in,256),  self.activation ,nn.Dropout(0.5)   ,nn.BatchNorm1d(256)   )
+        self.fc2   = nn.Sequential(    nn.Linear(256,128),  self.activation ,nn.Dropout(0.5)   ,nn.BatchNorm1d(128) )
+        self.fc3   = nn.Sequential(    nn.Linear(128,64),  self.activation  ,nn.Dropout(0.5)   ,nn.BatchNorm1d(64) )
+        self.fc4   = nn.Sequential(    nn.Linear(64,32),  self.activation   ,nn.Dropout(0.5)   ,nn.BatchNorm1d(32) )
+        self.fc5   = nn.Sequential(    nn.Linear(32,3)   )
+
+        self.is_debug= False
+        
+    def encode(self, X):
+        
+        
+        if self.is_debug  : print('--------Convolute--------'); print(X.shape) 
+            
+        X = self.conv1(X)
+        if self.is_debug  : print(X.shape) 
+            
+        X = self.conv2(X)
+        if self.is_debug  : print(X.shape) 
+            
+        X = X.flatten(start_dim = 1)
+
+        # print(X.shape)
+        X = self.fc1(X)
+        if self.is_debug : print('--------Flatten--------') ; print(X.shape) 
+
+        X = self.fc2(X)
+        if self.is_debug  : print(X.shape) 
+
+        X = self.fc3(X)
+        if self.is_debug  : print(X.shape) 
+        
+        X = self.fc4(X)
+        if self.is_debug  : print(X.shape) 
+
+        X = self.fc5(X)
+        if self.is_debug  : print(X.shape) 
+
+            
+        return X
+        
+    def forward(self,X):
+        X = self.encode(X)
+        return X
+    
+    def get_latent( self, X):
+        if self.is_debug  : print('--------Convolute--------'); print(X.shape) 
+            
+        X = self.conv1(X)
+        if self.is_debug  : print(X.shape) 
+            
+        X = self.conv2(X)
+        if self.is_debug  : print(X.shape) 
+            
+        X = X.flatten(start_dim = 1)
+        if self.is_debug  : print('--------Flatten--------') ; print(X.shape) 
+ 
+        X = self.fc1(X)
+        if self.is_debug : print('--------Flatten--------') ; print(X.shape) 
+
+        X = self.fc2(X)
+        if self.is_debug  : print(X.shape) 
+
+        X = self.fc3(X)
+        if self.is_debug  : print(X.shape) 
+        
+        X = self.fc4(X)
+        if self.is_debug  : print(X.shape) 
+        
+        return X
+    
+    def classifier(self, latent):
+        return self.fc5(latent)

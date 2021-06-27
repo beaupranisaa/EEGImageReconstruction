@@ -47,7 +47,7 @@ model_name = "cnn"
 roundno = sys.argv[8]
 tmin = float(sys.argv[9])
 tmax = float(sys.argv[10])
-psd_enable = bool(sys.argv[11])
+psd_enable = sys.argv[11]
 
 
 print("#############Configuration#################")
@@ -71,8 +71,8 @@ if psd_enable is True:
     y = np.load('../data/participants/{par}/02_ArtifactRemoval_Epoching/{file}_{task}_{fmin}_{fmax}_{tmin}_{tmax}_{electrode_zone}_psd_y.npy'.format(par=par,file=file, task=task,fmin = fmin, fmax = fmax, tmin=tmin, tmax=tmax, electrode_zone=electrode_zone), allow_pickle=True)
 
 else:
-    X_ = np.load('../data/participants/{par}/02_ArtifactRemoval_Epoching/{file}_{task}_{fmin}_{fmax}_{tmin}_{tmax}_{electrode_zone}_X.npy'.format(par=par,file=file, task=task,fmin = fmin, fmax = fmax, tmin=tmin, tmax=tmax), allow_pickle=True)
-    y = np.load('../data/participants/{par}/02_ArtifactRemoval_Epoching/{file}_{task}_{fmin}_{fmax}_{tmin}_{tmax}_{electrode_zone}_y.npy'.format(par=par,file=file, task=task,fmin = fmin, fmax = fmax, tmin=tmin, tmax=tmax), allow_pickle=True)
+    X_ = np.load('../data/participants/{par}/02_ArtifactRemoval_Epoching/{file}_{task}_{fmin}_{fmax}_{tmin}_{tmax}_{electrode_zone}_X.npy'.format(par=par,file=file, task=task,fmin = fmin, fmax = fmax, tmin=tmin, tmax=tmax, electrode_zone=electrode_zone), allow_pickle=True)
+    y = np.load('../data/participants/{par}/02_ArtifactRemoval_Epoching/{file}_{task}_{fmin}_{fmax}_{tmin}_{tmax}_{electrode_zone}_y.npy'.format(par=par,file=file, task=task,fmin = fmin, fmax = fmax, tmin=tmin, tmax=tmax, electrode_zone=electrode_zone), allow_pickle=True)
 
 X = X_ # get_electrode(X_,electrodes)
 
@@ -102,14 +102,14 @@ print(y.shape)
 # 2.1 Reserve some data for TEST
 from sklearn.model_selection import train_test_split
 
-X_trainval, X_test, y_trainval, y_test = train_test_split( X, y, test_size=0.1, random_state=42, stratify= y)
+X_trainval, X_test, y_trainval, y_test = train_test_split( X, y, test_size=0.1, stratify= y)
 #X_model, X_real_test, y_model, y_real_test = train_test_split( X, y, test_size=0.1, random_state=42, stratify= y)
 
 # Check if number of classes is equal
 check_split(X_trainval, X_test, y_trainval, y_test, 'trainval', 'test')
 
 # 2.2 Train Val Split
-X_train, X_val, y_train, y_val = train_test_split( X_trainval, y_trainval, test_size=0.33, random_state=42, stratify= y_trainval)
+X_train, X_val, y_train, y_val = train_test_split( X_trainval, y_trainval, test_size=0.33, stratify= y_trainval)
 check_split(X_train, X_val, y_train, y_val,'train','val')
 
 # 3. Prepare Train Val Test Data 
@@ -290,7 +290,7 @@ for i, model in enumerate(models):
             print(f'Epoch: {epoch+1:02}/{N_EPOCHS}  |',end='')
             print(f'\tTrain Loss: {train_loss:.5f}  | Train Acc: {train_acc:.2f}%  |', end='')
             print(f'\t Val. Loss: {valid_loss:.5f}  | Val. Acc: {valid_acc:.2f}%')
-            do_plot(train_losses, valid_losses)
+            # do_plot(train_losses, valid_losses)
 
 
         if epoch > 500 and valid_loss < best_valid_loss:

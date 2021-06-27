@@ -29,7 +29,7 @@ tmin = float(sys.argv[5])
 tmax = float(sys.argv[6])
 electrode_zone = sys.argv[7]
 electrodes = [i for i in sys.argv[8].replace('[', ' ').replace(']', ' ').replace(',', ' ').split()]
-psd_enable = bool(sys.argv[9])
+psd_enable = sys.argv[9]
 
 # Here I decided to keep stuff in a form of dictionary where **keys** indicate the **task and time**
 
@@ -79,8 +79,7 @@ for task_type in task_types:
 
 
 event_id = {'0': 1, '1' : 2, '2': 3}
-# tmin = 0.115 #0
-# tmax = 0.875
+
 import time
 for task_type in task_types:
     X=[]
@@ -96,8 +95,7 @@ for task_type in task_types:
         # Filter Frequency
         epoch_copy.filter(fmin, fmax, method='iir')
         # Min-Max Normalization
-        epoch_copy = np.transpose(epoch_copy.to_data_frame().to_numpy(), (1,0))
-        epoch_copy = epoch_copy[1:,:]
+        epoch_copy = epoch_copy.data
         min = epoch_copy.min()
         max = epoch_copy.max()
         epoch_copy = (epoch_copy - min) / (max-min)

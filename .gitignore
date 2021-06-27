@@ -136,4 +136,7 @@ data/**
 data/participants/par18/04_Image_Reconstruction/**
 model/**
 results/*.csv
+results/heatmap/csv/**
+results/old_results/**
+
 #test
